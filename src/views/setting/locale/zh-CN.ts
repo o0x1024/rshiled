@@ -1,0 +1,98 @@
+export default {
+  'asm.overview': '信息总览',
+  'asm.enterprise': '企业信息',
+  'asm.root-domain': '备案域名',
+  'asm.domain': '域名解析',
+  'asm.ip': 'IP地址',
+  'asm.website': '网站',
+  'asm.port': '端口',
+  'asm.web-component': 'WEB 组件',
+  'asm.risk': '安全风险',
+
+  'asm.export': '导出资产',
+  'asm.time': '时间',
+  'asm.count': '子域名',
+  'asm.all': '全部',
+
+  'asm.critical': '严重',
+  'asm.high': '高危',
+  'asm.medium': '中危',
+  'asm.low': '低危',
+
+  'asm.running':'扫描中',
+  'asm.not_running':'等待扫描',
+
+  'asm.processed': '已处理',
+  'asm.untreated': '待处理',
+  'asm.ignore': '已忽略',
+
+
+  'asm.enterprise-info': '企业信息',
+  'asm.add-enterprise': '新增企业',
+  'asm.del-enterprise': '删除',
+  'asm.enterprise-name': "企业名称",
+  'asm.monitor-status': '监控状态',
+  'asm.operation': '操作',
+  'asm.check-enterprise-name': '校验企业名称',
+  'asm.add-enterprise-model': '添加企业',
+  'asm.add-enterprise-placeholder': '添加完整的企业名称',
+  'asm.running-status': '运行状态',
+  'root-domain.icp-enterprise': '企业视角',
+  'asm.root-domain.domain': '域名',
+  'asm.root-domain.icp-enterprise-name': 'ICP企业',
+  'asm.root-domain.icp-no': 'ICP号',
+  'asm.root-domain.subdomain-count': '子域名',
+
+  'asm.root-domain.enterprise_name': '企业名',
+  'asm.root-domain.domain-count': '子域名',
+  'asm.root-domain.enterprise-name': 'ICP企业',
+  'asm.root-domain.add-asset': '添加种子域名',
+  'asm.root-domain.add-asset-placeholder': '添加种子域名(根域名),一行一个',
+  'asm.root-domain.add-domain': '新增域名',
+
+  'asm.domain.table': '域名',
+  'asm.domain.a': 'A 记录',
+  'asm.domain.cname': 'CNAME 记录',
+  'asm.domain.ns': 'NS 记录',
+  'asm.domain.mx': 'MX 记录',
+
+
+  'asm.ip.as_name': 'ASN',
+  'asm.ip.provider': '运营商',
+  'asm.ip.ip_range': '网段',
+  'asm.ip.location': '地理位置',
+  'asm.ip.tag': '标签',
+  'asm.ip.add-ip': '新增IP资产',
+  'asm.ip.ip': 'IP',
+  'asm.ip.domain': '域名',
+  'asm.ip.port': '端口',
+  'asm.ip.tags': '标签',
+  'asm.ip.count': 'IP地址数',
+
+  'asm.port.all': '端口',
+  'asm.port.ip': 'IP地址',
+  'asm.port.component': '应用组件',
+  'asm.port.service_name': '服务名',
+  'asm.port.port_no': '端口号',
+  'asm.port.service_type': '服务类型',
+  'asm.port.count': '端口数',
+
+
+  'asm.website.status_code': '状态码',
+  'asm.website.render_title': '网站标题',
+  'asm.website.server': 'WEB 框架',
+  'asm.website.category_key': '业务类型',
+  'asm.website.title': '网站标题',
+  'asm.website.url': 'URL',
+
+  'asm.component.sub_category': '组件类型',
+  'asm.component.name': '组件名称',
+  'asm.component.url': 'URL',
+  'asm.component.type': '类型',
+
+  'asm.risk.name': "风险名称",
+  'asm.risk.target': '风险点',
+  'asm.risk.status': '漏洞状态',
+  'asm.risk.level':'等级',
+  
+}

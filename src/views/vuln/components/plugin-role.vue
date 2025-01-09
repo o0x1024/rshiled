@@ -1,0 +1,3 @@
+<template>
+	plugin-role
+</template>
