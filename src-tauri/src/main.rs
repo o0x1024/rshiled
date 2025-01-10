@@ -2,19 +2,21 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 pub mod utils;
-
+pub mod plugin;
 
 use rshield_lib::{asm::asm_task::asm_init, config::config::AppConfig, database};
 
 #[tokio::main]
 async fn main() {
     // 初始化配置
-    AppConfig::init();
+
 
     if utils::file::is_first_run() {
         //初始化数据库
         database::init_db();
     }
+
+    AppConfig::init();
 
     // Use spawn_blocking instead of spawn
     std::thread::spawn(|| {

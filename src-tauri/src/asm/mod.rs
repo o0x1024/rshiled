@@ -2,6 +2,7 @@ pub mod domain;
 pub mod enterprise;
 pub mod rootdomain;
 pub mod task;
+pub mod ips;
 
 use lazy_static::lazy_static;
 

@@ -1,16 +1,16 @@
-use rusqlite::{params, Connection};
-
 use crate::utils;
+use rusqlite::{params, Connection};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Domain {
-    pub id: usize,
-    pub enterprise_id: usize,
+    pub id: Option<usize>,
+    pub enterprise_id: isize,
     pub domain: String,
-    pub aaa: Option<String>,
-    pub cname: Option<String>,
-    pub ns: Option<String>,
-    pub mx: Option<String>,
+    pub aaa: Option<Vec<String>>,
+    pub cname: Option<Vec<String>>,
+    pub ns: Option<Vec<String>>,
+    pub mx: Option<Vec<String>>,
     pub create_at: isize,
     pub update_at: isize,
 }
@@ -30,27 +30,44 @@ pub async fn get_domains(
         "AAAA" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE aaa IS NOT NULL",
         "CNAME" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE cname IS NOT NULL", 
         "NS" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE ns IS NOT NULL",
-        "MS" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE mx IS NOT NULL",
+        "MX" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE mx IS NOT NULL",
         _ => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain"
     };
 
-    let sql =format!("{} WHERE domain LIKE ? LIMIT ?, ?", base_sql);
+    let  sql: String ;
+
+    if dtype == "all"{
+         sql = format!("{} WHERE domain LIKE ? LIMIT ?, ?", base_sql);
+
+    }else{
+         sql = format!("{} AND domain LIKE ? LIMIT ?, ?", base_sql);
+
+    }
 
     // Prepare the domain pattern if query is not empty
     let domain_pattern = format!("%{}", query);
 
     let mut stmt = conn.prepare(&sql).unwrap();
     let domain_iter = stmt
-        .query_map(params![domain_pattern, (page - 1) * pagesize, pagesize],
+        .query_map(
+            params![domain_pattern, (page - 1) * pagesize, pagesize],
             |row| {
                 Ok(Domain {
                     id: row.get(0)?,
                     enterprise_id: row.get(1)?,
-                    domain: row.get(2)?,
-                    aaa: row.get(3)?,
-                    cname: row.get(4)?,
-                    ns: row.get(5)?,
-                    mx: row.get(6)?,
+                    domain: row.get(2)?,    
+                    aaa: row
+                        .get::<_, Option<String>>(3)?
+                        .and_then(|s| serde_json::from_str(&s).ok()),
+                    cname: row
+                        .get::<_, Option<String>>(4)?
+                        .and_then(|s| serde_json::from_str(&s).ok()),
+                    ns: row
+                        .get::<_, Option<String>>(5)?
+                        .and_then(|s| serde_json::from_str(&s).ok()),
+                    mx: row
+                        .get::<_, Option<String>>(6)?
+                        .and_then(|s| serde_json::from_str(&s).ok()),
                     create_at: row.get(7)?,
                     update_at: row.get(8)?,
                 })

@@ -37,3 +37,13 @@ export interface Domain {
 	update_at: number
 }
 
+
+
+export interface IPs {
+	id: number
+	enterprise_id: string
+	ip_addr: string
+	create_at: number
+	update_at: number
+}
+

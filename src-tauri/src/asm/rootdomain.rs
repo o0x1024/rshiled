@@ -1,4 +1,4 @@
-use super::enterprise::{self, Enterprise};
+use super::enterprise::Enterprise;
 use crate::utils;
 use chrono::prelude::*;
 use rusqlite::Connection;
@@ -48,10 +48,13 @@ pub async fn add_root_domain(
             update_at: timestamp,
             count: 0,
         };
-        conn.execute(
+        match conn.execute(
 			"INSERT INTO RootDomain (domain,enterprise_id,enterprise_name,create_at,update_at) VALUES (?1,?2,?3,?4,?5)",
 			(&icpdomain.domain, &icpdomain.enterprise_id, &icpdomain.enterprise_name, &icpdomain.create_at, &icpdomain.update_at),
-		).unwrap();
+		){
+            Ok(_) => (),
+            Err(_) =>()
+        }
     }
 
     Ok("This worked!".into())
@@ -119,17 +122,16 @@ pub async fn get_ent_domain(page: usize, pagesize: usize) -> Result<Vec<EntInfo>
     let db_path = utils::file::get_db_path();
 
     let conn = Connection::open(db_path).unwrap();
-    let mut ent_stmt = conn.prepare("SELECT * FROM Enterprise").unwrap();
+    let mut ent_stmt = conn.prepare("SELECT * FROM Enterprise LIMIT ?, ?").unwrap();
 
     let enterprise_iter = ent_stmt
-        .query_map([], |row| {
+        .query_map([(page - 1) * pagesize, pagesize], |row| {
             Ok(Enterprise {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                icp_no: row.get(2)?,
-                monitor_status: row.get(3)?,
-                next_runtime: row.get(4)?,
-                running_status: row.get(5)?,
+                monitor_status: row.get(2)?,
+                next_runtime: row.get(3)?,
+                running_status: row.get(4)?,
             })
         })
         .unwrap();

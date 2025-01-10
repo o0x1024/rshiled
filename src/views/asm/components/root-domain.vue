@@ -29,7 +29,7 @@
 		<a-col :span="24">
 			<template v-if="group_by === 'all'">
 
-				<a-table :columns="all_columns" :bordered="false" :data="rtds.list" :pagination="pagination"
+				<a-table :columns="all_columns" :bordered="false" :data="rtds.list" :pagination="pagination" :scroll="scroll"
 					@page-change="onPageChange" size="small">
 					<template #operation="{ record }">
 						<a-space>
@@ -49,10 +49,10 @@
 						<template v-else>--</template>
 					</template>
 					<template #time="{ record }">
-						<template v-if="record.create_at != 0">创建时间: {{ formatDateTime(record.create_at) }}</template>
+						<template v-if="record.create_at != 0">创建: {{ formatDateTime(record.create_at) }}</template>
 						<template v-else>创建时间:--</template>
 						<br />
-						<template v-if="record.update_at != 0">更新时间: {{ formatDateTime(record.update_at) }}</template>
+						<template v-if="record.update_at != 0">更新: {{ formatDateTime(record.update_at) }}</template>
 						<template v-else>更新时间:--</template>
 					</template>
 					<template #count="{ record }">
@@ -84,7 +84,7 @@
 					<a-option :value="item.id">{{ item.name }}</a-option>
 				</template>
 			</a-select>
-			<a-textarea :style="{ width: '320px' }" v-model:model-value="textare_domains"
+			<a-textarea :style="{ width: '320px' }" v-model:model-value="textare_domains" 
 				:placeholder="$t('asm.root-domain.add-asset-placeholder')" allow-clear auto-size />
 		</a-space>
 	</a-modal>
@@ -136,6 +136,11 @@ const onPageChange = (_page: number) => {
 
 };
 
+
+const scroll = {
+  y: 900
+}
+
 async function RefreshData() {
 	await invoke("get_root_domains", { page: pagination.current, pagesize: pagination.pageSize }).then((res:any) =>{
 		if(res){
@@ -186,7 +191,7 @@ const handlerOpsChange = (value: string | number | boolean | Record<string, any>
 const handlerSearch = async () => {
 	await invoke("get_enterprise_list").then((res: any) => {
 		if (res) {
-			ents.list = res;
+			ents.list = res.list;
 		}
 	});
 
@@ -209,6 +214,13 @@ const toDomain = async (domain: string) => {
 
 const onAddDomain = async () => {
 	add_visible.value = true
+	await invoke("get_enterprise_list", { page: pagination.current, pagesize: pagination.pageSize }).then((res: any) => {
+		if (res) {
+			ents.list = res.list
+		}
+	}).catch(error => console.error(error))
+
+
 }
 
 async function handleOk() {
@@ -248,6 +260,7 @@ const all_columns = computed(() => {
 			title: t('asm.time'),
 			dataIndex: 'time',
 			slotName: 'time',
+			width:210
 		},
 		{
 			title: t('asm.operation'),

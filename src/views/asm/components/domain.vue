@@ -48,7 +48,7 @@
 			</a-col>
 		</a-row>
 
-		<a-table :columns="all_columns" :data="domains.list" :pagination="pagination" size='small'
+		<a-table :columns="all_columns" :data="domains.list" :pagination="pagination" size='small' :scroll="scroll"
 			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
 
 
@@ -62,10 +62,10 @@
 			</template>
 
 			<template #time="{ record }">
-				<template v-if="record.create_at != 0">创建时间: {{ formatDateTime(record.create_at) }}</template>
+				<template v-if="record.create_at != 0">创建: {{ formatDateTime(record.create_at) }}</template>
 				<template v-else>创建时间:--</template>
 				<br />
-				<template v-if="record.update_at != 0">更新时间: {{ formatDateTime(record.update_at) }}</template>
+				<template v-if="record.update_at != 0">更新: {{ formatDateTime(record.update_at) }}</template>
 				<template v-else>更新时间:--</template>
 			</template>
 
@@ -81,7 +81,7 @@ import { Pagination } from '@/types/global';
 import { formatDateTime } from '@/utils/format';
 import { Message } from '@arco-design/web-vue';
 import { invoke } from '@tauri-apps/api/core';
-import { Domain } from 'domain';
+import { Domain } from './types';
 import { computed, reactive, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import  {useRoute} from 'vue-router'
@@ -97,6 +97,10 @@ const pagination: Pagination = reactive({
 	showSizeChanger: true,
 });
 
+
+const scroll = {
+  y: 600
+}
 
 
 const search_key = ref('search')
@@ -202,11 +206,12 @@ const all_columns = computed(() => {
 			title: t('asm.time'),
 			dataIndex: 'time',
 			slotName: "time",
-
+			width:210
 		},
 		{
 			title: t('asm.operation'),
 			slotName: "operation",
+			width:100
 		},
 	];
 

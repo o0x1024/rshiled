@@ -30,10 +30,9 @@ pub fn init_db() {
         "CREATE TABLE  if not exists Enterprise (
             id    INTEGER PRIMARY KEY AUTOINCREMENT,
             name  TEXT NOT NULL,
-            icp_no  TEXT,
-			monitor_status INTEGER NOT NULL DEFAULT 1,,
-            next_runtime INT,
-            running_status INT
+			monitor_status INTEGER NOT NULL DEFAULT 1,
+            next_runtime INT DEFAULT 1693526400,
+            running_status TEXT DEFAULT 'wait'
         )",
         (), // empty list of parameters.
     )
@@ -91,13 +90,20 @@ pub fn init_db() {
 
 
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS Config (
-            dns_collection_brute_status INTEGER NOT NULL DEFAULT 0,
-            dns_collection_plugin_statuINTEGER NOT NULL DEFAULT 0,
-        );",
+        "CREATE TABLE  if not exists IPs (
+            id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            enterprise_id  INTEGER NOT NULL,
+            ip_addr  TEXT,
+            domain TEXT,
+            port_count INTEGER,
+			create_at INTEGER,
+            update_at INTEGER,
+            UNIQUE (ip_addr)
+        )",
         (), // empty list of parameters.
     )
     .unwrap();
+
 
     // CREATE INDEX idx_plugins_name ON plugins(name);
     // CREATE INDEX idx_plugins_type ON plugins(plugin_type);
@@ -106,16 +112,24 @@ pub fn init_db() {
     let me = Enterprise {
         id: 1,
         name: "芒果TV".to_string(),
-        icp_no: "2516465456456".to_string(),
         monitor_status: true,
         next_runtime: 132156464,
-        running_status: 0,
+        running_status: "wait".to_string(),
     };
 
     conn.execute(
-        "INSERT INTO Enterprise (id, name,icp_no,monitor_status,next_runtime,running_status) VALUES (?1, ?2, ?3, ?4,?5,?6)",
-        (&me.id,&me.name,&me.icp_no,&me.monitor_status,&me.next_runtime,&me.running_status),
+        "INSERT INTO Enterprise (id, name,monitor_status,next_runtime,running_status) VALUES (?1, ?2, ?3, ?4,?5)",
+        (&me.id,&me.name,&me.monitor_status,&me.next_runtime,&me.running_status),
     ).unwrap();
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS Config (
+            dns_collection_brute_status INTEGER NOT NULL DEFAULT 0,
+            dns_collection_plugin_status INTEGER NOT NULL DEFAULT 0
+        );",
+        (), // empty list of parameters.
+    )
+    .unwrap();
 
 
     //插入初始化配置
@@ -124,7 +138,7 @@ pub fn init_db() {
         dns_collection_plugin_status:false,
     };
     conn.execute(
-        "INSERT INTO Config (dns_collection_brute_status, dns_collection_plugin_status,) VALUES (?1, ?2)",
+        "INSERT INTO Config (dns_collection_brute_status, dns_collection_plugin_status) VALUES (?1, ?2)",
         (&conf.dns_collection_brute_status,&conf.dns_collection_plugin_status),
     ).unwrap();
 

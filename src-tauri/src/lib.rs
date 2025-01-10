@@ -14,11 +14,13 @@ use tauri::{
     tray::TrayIconBuilder,
 };
 
+
 use plugin::plugin::{edit_plugin, get_plugins, new_plugin};
 
 use asm::{
+    ips::get_ips,
     domain::get_domains,
-    enterprise::get_enterprise_list,
+    enterprise::{get_enterprise_list,add_enterprise},
     rootdomain::{add_root_domain, del_rootdomain_by_id, get_ent_domain, get_root_domains},
 };
 
@@ -44,12 +46,14 @@ pub fn run() {
             get_enterprise_list,
             add_root_domain,
             get_root_domains,
+            add_enterprise,
             get_ent_domain,
             del_rootdomain_by_id,
             get_domains,
             get_plugins,
             new_plugin,
-            edit_plugin
+            edit_plugin,
+            get_ips,
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

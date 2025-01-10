@@ -44,7 +44,7 @@ pub async fn dns_collection_by_api(domain: &str) -> Result<Vec<String>, String> 
         Err(e) => println!("Error: {}", e),
     }
 
-    println!("domains:{:?}", domains);
+    // println!("domains:{:?}", domains);
     Ok(domains)
     // Err("Not implemented".to_string())
 }

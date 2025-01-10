@@ -1,8 +1,13 @@
+use tokio::task::JoinHandle;
 use rand::Rng;
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use trust_dns_resolver::config::{ResolverConfig, ResolverOpts};
+use trust_dns_resolver::proto::rr::RecordType;
+use trust_dns_resolver::TokioAsyncResolver;
 
+use crate::asm::domain::Domain;
 use crate::asm::enterprise::Enterprise;
 use crate::asm::rootdomain::RootDomain;
 use crate::config::config::AppConfig;
@@ -12,6 +17,8 @@ use std::thread;
 use std::time::Duration;
 use tokio::sync::RwLock;
 use tokio::task;
+
+use super::ips::IPs;
 
 // 任务结构体
 #[derive(Clone)]
@@ -41,10 +48,9 @@ impl TaskModule {
                 Ok(Enterprise {
                     id: row.get(0)?,
                     name: row.get(1)?,
-                    icp_no: row.get(2)?,
-                    monitor_status: row.get(3)?,
-                    next_runtime: row.get(4)?,
-                    running_status: row.get(5)?,
+                    monitor_status: row.get(2)?,
+                    next_runtime: row.get(3)?,
+                    running_status: row.get(4)?,
                 })
             })
             .unwrap();
@@ -79,8 +85,8 @@ impl TaskModule {
 
                 task::spawn(async move {
                     // 生成一个 24 小时内的时间间隔 N
-                    let n = rand::thread_rng().gen_range(0..24 * 3600);
-                    // let n = rand::thread_rng().gen_range(10..20);
+                    // let n = rand::thread_rng().gen_range(0..24 * 3600);
+                    let n = rand::thread_rng().gen_range(20..40);
 
                     //更新下次运行的时间
                     let sleep_time = Duration::from_secs(n);
@@ -100,7 +106,6 @@ impl TaskModule {
 
     // 执行任务
     async fn run_task(&self, task_id: isize) {
-
         // Scope the mutex guard so it's dropped before any await points
         let root_domains = {
             let conn = self.conn.lock().unwrap();
@@ -130,7 +135,7 @@ impl TaskModule {
             domains
         }; // MutexGuard is dropped here
 
-
+        
         //获取域名信息 一个是内置的接口，二是暴破，三是通过插件模块进行获取
         {
             let mut tasks = self.tasks.write().await;
@@ -142,7 +147,7 @@ impl TaskModule {
         //1.接口获取域名信息
         let mut result_domain = Vec::new();
         for domain in root_domains {
-            println!("[*] domain collection:{}",domain);
+            println!("[*] domain collection:{}", domain);
             match dns_collection_by_api(domain.as_str()).await {
                 Ok(domains) => {
                     result_domain.extend(domains);
@@ -155,45 +160,213 @@ impl TaskModule {
         // println!("{:?}",result_domain);
         //暴力破解
         let config = AppConfig::global();
-        if config.dns_collection_brute_status{
-
-        }
+        if config.dns_collection_brute_status {}
 
         //插件获取
-        if config.dns_collection_plugin_status{
-        }
+        if config.dns_collection_plugin_status {}
 
 
+        //定义一个IP数组来保存域名解析的IP地址
         //获取域名对象的DNS记录
-        // 把拿到的域名写到数据库里
-        let conn = self.conn.lock().unwrap();
-        for dm in result_domain {
-            let now = chrono::Local::now().timestamp();
-            match conn.execute("INSERT INTO Domain (enterprise_id,domain,create_at, update_at) VALUES (?1, ?2, ?3, ?4)",(
-                &task_id,
-                &dm,
-                &now,    // create_at
-                &now,    // update_at
-            )){
-                Ok(_) => (),
-                Err(_) => ()
-            }
+        // let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+        let mut handle_list = Vec::<JoinHandle<()>>::new();
+        for dm in result_domain.clone() {
+            handle_list.push(tokio::spawn(async move {
+                let mut all_domain = Vec::<Domain>::new();
+                let resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+
+                let mut td = Domain {
+                    id: None,
+                    enterprise_id: task_id,
+                    domain: dm.clone().to_string(),
+                    aaa: None,
+                    cname: None,
+                    mx: None,
+                    ns: None,
+                    create_at: 0,   
+                    update_at: 0,
+                };
+                // 查询 A 记录（IPv4 地址）
+                let mut record = Vec::new();
+                let a_records = resolver.lookup_ip(dm.clone()).await;
+                if let Ok(records) = a_records {
+                    for ip in records {
+                        record.push(ip.to_string());
+                    }
+                }
+                if record.len() > 0{
+                    td.aaa = Some(record);
+                }
+    
+                // 查询 CNAME 记录
+                record = Vec::new();
+                let cname_records = resolver.lookup(dm.clone(), RecordType::CNAME).await;
+                if let Ok(records) = cname_records {
+                    for ip in records {
+                        record.push(ip.to_string());
+                    }
+                }
+                if record.len() > 0{
+                    td.cname = Some(record);
+                }
+    
+                // 查询 MX 记录（邮件服务器）
+                record = Vec::new();
+                let mx_records = resolver.lookup(dm.clone(), RecordType::MX).await;
+                if let Ok(records) = mx_records {
+                    for ip in records {
+                        record.push(ip.to_string());
+                    }
+                }
+                if record.len() > 0{
+                    td.mx = Some(record);
+                }
+               
+                // 查询 TXT 记录
+                record = Vec::new();
+                let ns_records = resolver.lookup(dm.clone(), RecordType::NS).await;
+                if let Ok(records) = ns_records {
+                    for ip in records {
+                        record.push(ip.to_string());
+                    }
+                }
+                if record.len() > 0{
+                    td.ns = Some(record);
+                }
+    
+                all_domain.push(td);
+                // 把拿到的域名写到数据库里
+                let db_path = utils::file::get_db_path();
+                let conn = Connection::open(db_path).unwrap();
+                for domain in &all_domain {
+                    let now: i64 = chrono::Local::now().timestamp();
+    
+                    let aaa_json = domain.aaa.as_ref().map(|v| serde_json::to_string(v).unwrap());
+                    let cname_json = domain.cname.as_ref().map(|v| serde_json::to_string(v).unwrap());
+                    let ns_json = domain.ns.as_ref().map(|v| serde_json::to_string(v).unwrap());
+                    let mx_json = domain.mx.as_ref().map(|v| serde_json::to_string(v).unwrap());
+                    match conn.execute("INSERT INTO Domain (enterprise_id,domain,aaa,cname,mx,ns,create_at, update_at) VALUES (?1, ?2, ?3, ?4 ,?5 ,?6 ,?7 ,?8)",params![
+                        &task_id,
+                        domain.domain,
+                        aaa_json,    
+                        cname_json,  
+                        mx_json,    
+                        ns_json,    
+                        now,    
+                        now,    
+                        ]){
+                    Ok(_) => (),
+                    Err(_) => ()
+                    }
+                }
+            }));
+            
         }
 
-        //获取IP地址
+        for handle in  handle_list {
+            let _ =tokio::join!(handle);
+        }
 
+        {
+            let mut tasks = self.tasks.write().await;
+            let mut task = tasks.get(&task_id).unwrap().clone();
+            task.running_status = "collection ip".to_string();
+            tasks.insert(task_id, task);
+        }
+
+
+        //获取IP地址///////??//??//??//??//??//??//??//??
+        handle_list = Vec::<JoinHandle<()>>::new();
+        for dm in result_domain.clone() {
+            handle_list.push(tokio::spawn(async move {
+                let mut ip_list: Vec<IPs> = Vec::<IPs>::new();
+                let resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+                let a_records = resolver.lookup_ip(dm.clone()).await;
+                if let Ok(records) = a_records {
+                    let now: i64 = chrono::Local::now().timestamp();
+                    if records.iter().count() ==  1{
+                        if let Some(ip) = records.iter().next() {
+                            let ip_string = ip.to_string();
+                            ip_list.push(IPs { id: None, enterprise_id: task_id.clone(), ip_addr: Some(ip_string),domain:Some(dm.clone()),port_count:None, create_at: now, update_at: now });
+                        } 
+                    }
+                }
+
+                for ip in &ip_list{
+                    let db_path = utils::file::get_db_path();
+                    let conn = Connection::open(db_path).unwrap();
+                    match conn.execute("INSERT INTO IPs (enterprise_id,ip_addr,domain,port_count,create_at, update_at) VALUES (?1, ?2, ?3, ?4,?5,?6)",params![
+                        &task_id,
+                        ip.ip_addr,
+                        ip.domain,
+                        0,
+                        ip.create_at,
+                        ip.update_at,
+                        ]){
+                    Ok(_) => (),
+                    Err(_) => ()
+                    }
+                }
+            }));
+        }
+
+        for handle in  handle_list {
+            let _ =tokio::join!(handle);
+        }
+
+
+
+        {
+            let mut tasks = self.tasks.write().await;
+            let mut task = tasks.get(&task_id).unwrap().clone();
+            task.running_status = "scan port".to_string();
+            tasks.insert(task_id, task);
+        }
         //扫描端口并且识别服务
 
+
+        {
+            let mut tasks = self.tasks.write().await;
+            let mut task = tasks.get(&task_id).unwrap().clone();
+            task.running_status = "scan website".to_string();
+            tasks.insert(task_id, task);
+        }
         //扫描网站信息
 
+
+        {
+            let mut tasks = self.tasks.write().await;
+            let mut task = tasks.get(&task_id).unwrap().clone();
+            task.running_status = "scan risk".to_string();
+            tasks.insert(task_id, task);
+        }
         //扫描安全风险信息
+
+
+
+        {
+            let mut tasks = self.tasks.write().await;
+            let mut task = tasks.get(&task_id).unwrap().clone();
+            task.running_status = "wait".to_string();
+            tasks.insert(task_id, task);
+        }
     }
 
     // 查询任务状态
-    pub async fn query_task_status(&self, task_id: isize) -> String {
-        let tasks = self.tasks.read().await;
-        let task = tasks.get(&task_id).unwrap().clone();
-        task.running_status
+    pub fn query_task_status(&self, task_id: isize) -> String {
+        match self.tasks.try_read(){
+            Ok(tasks) => {
+                if let Some(task) = tasks.get(&task_id) {
+                    return task.running_status.clone();
+                }else{
+                    "Task not found".to_string()
+                }
+            }
+            Err(_) => {
+                "".to_string()
+            }
+        }
+
     }
 
     // 动态添加任务
@@ -208,7 +381,9 @@ impl TaskModule {
 
         task::spawn(async move {
             // 生成一个 24 小时内的时间间隔 N
-            let n = rand::thread_rng().gen_range(0..24 * 3600);
+            // let n = rand::thread_rng().gen_range(0..24 * 3600);
+            let n = rand::thread_rng().gen_range(20..40);
+
             let sleep_time = Duration::from_secs(n);
 
             loop {
@@ -227,25 +402,25 @@ impl TaskModule {
     }
 }
 
-pub async fn asm_init() {
-    let db_path = utils::file::get_db_path();
+// pub async fn asm_init() {
+//     let db_path = utils::file::get_db_path();
 
-    let task_module = Arc::new(TaskModule {
-        tasks: Arc::new(RwLock::new(HashMap::new())),
-        conn: Arc::new(Mutex::new(Connection::open(db_path).unwrap())),
-    });
+//     let task_module = Arc::new(TaskModule {
+//         tasks: Arc::new(RwLock::new(HashMap::new())),
+//         conn: Arc::new(Mutex::new(Connection::open(db_path).unwrap())),
+//     });
 
-    task_module.start().await;
+//     task_module.start().await;
 
-    // 查询任务状态
-    // task_module.query_task_status(1).await;
+//     // 查询任务状态
+//     // task_module.query_task_status(1).await;
 
-    // 动态添加任务
-    // let new_task = Task {
-    //     id: 3,
-    //     name: "任务3".to_string(),
-    //     interval: 10800, // 3小时
-    //     last_run: Instant::now(),
-    // };
-    // task_module.add_task(new_task).await;
-}
+//     // 动态添加任务
+//     // let new_task = Task {
+//     //     id: 3,
+//     //     name: "任务3".to_string(),
+//     //     interval: 10800, // 3小时
+//     //     last_run: Instant::now(),
+//     // };
+//     // task_module.add_task(new_task).await;
+// }

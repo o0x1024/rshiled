@@ -23,16 +23,15 @@
 				</template>
 
 				<template #running_status="{ record }">
-					<a-tag v-if="record.running_status == 1" color="green">{{ $t('asm.running') }}</a-tag>
-					<a-tag v-if="record.running_status == 0" >{{ $t('asm.not_running') }}</a-tag>
+					<a-tag color="green">{{ record.running_status }}</a-tag>
 				</template>
 
 
-				
+
 				<template #operation="{ record }">
 					<a-space>
 						<a-popconfirm content="确认删除么?" @ok="onDel(record.id)">
-							<a-link  size="small" type="primary" status="danger">{{
+							<a-link size="small" type="primary" status="danger">{{
 								$t('asm.del-enterprise') }}</a-link>
 						</a-popconfirm>
 					</a-space>
@@ -46,7 +45,7 @@
 			{{ $t('asm.add-enterprise-model') }}
 		</template>
 		<a-space direction="vertical">
-			<a-input :style="{ width: '320px' }" :placeholder="$t('asm.add-enterprise-placeholder')" allow-clear />
+			<a-input :style="{ width: '320px' }" v-model:model-value="enterprise_name"  :placeholder="$t('asm.add-enterprise-placeholder')" allow-clear />
 			<a-checkbox value="1">{{ $t('asm.check-enterprise-name') }}</a-checkbox>
 		</a-space>
 	</a-modal>
@@ -65,7 +64,6 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { Message } from '@arco-design/web-vue';
 
-
 const pagination: Pagination = reactive({
 	current: 1,
 	total: 0,
@@ -82,23 +80,34 @@ const enterprise_name = ref('')
 
 
 async function RefreshData() {
-	let res: any = await invoke("get_enterprise_list", { page: pagination.current, pagesize: pagination.pageSize });
-	if (res) {
-		enterprise.list = res
-	}
+	await invoke("get_enterprise_list", { page: pagination.current, pagesize: pagination.pageSize }).then((res: any) => {
+		if (res) {
+			enterprise.list = res.list
+		}
+	}).catch((err) => {
+		console.log(err)
+	})
+
 }
+
+
 
 const onAdd = () => { add_visible.value = true }
 
 
 async function handleOk() {
-	let res: any = await invoke("add_enterprise", { enterprise_name: enterprise_name.value });
-	if (res) {
-		enterprise.list = res.data
-		Message.success("删除成功")
-	} else {
-		Message.success("删除失败")
-	}
+	await invoke("add_enterprise", { enterprise_name: enterprise_name.value }).then((res: any) => {
+		if (res) {
+			RefreshData()
+			Message.success("添加成功")
+		} else {
+			Message.success("添加失败")
+		}
+	}).catch((err) => {
+		console.log(err)
+	})
+
+
 }
 
 function handleCancel() {
@@ -110,13 +119,17 @@ onMounted(() => {
 })
 
 const onDel = async (eid: string) => {
-	let res: any = await invoke("del_enterprise_by_id", { eid: eid });
-	if (res) {
-		enterprise.list = res.data
-		Message.success("删除成功")
-	} else {
-		Message.success("删除失败")
-	}
+	await invoke("del_enterprise_by_id", { eid: eid }).then((res: any) => {
+		if (res) {
+			enterprise.list = res.data
+			Message.success("删除成功")
+		} else {
+			Message.success("删除失败")
+		}
+	}).catch((err) => {
+		console.log(err)
+	})
+
 }
 
 const onPageChange = (_page: number) => {
