@@ -47,3 +47,21 @@ export interface IPs {
 	update_at: number
 }
 
+
+
+export interface WebSite {
+	id: number
+	enterprise_id: string
+	url: string
+     favicon:string,   //图标的hash
+     title:string,    //网站的标题
+     headers:string,    //请求响应的头
+     finger:Array<String>,    //网站指纹
+     screenshot:string,     //网站的截图
+     tags:Array<String>,
+     ssl_info:string,      //网站证书信息
+     create_at: number,    //创建时间
+     update_at: number,  
+}
+
+

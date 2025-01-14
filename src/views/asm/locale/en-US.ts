@@ -10,12 +10,14 @@ export default {
   'asm.risk': 'Risk',
 
 
+  'asm.website.screenshot':'screenshot',
 
   'asm.running':'Running',
   'asm.not_running':'Not Running',
 
   'asm.next-runtime':'Next Run',
 
+  'asm.enterprise.run':'Run',
   'asm.enterprise-info':'Enterprise Info',
   'asm.add-enterprise':'Add',
   'asm.del-enterprise':'Del',

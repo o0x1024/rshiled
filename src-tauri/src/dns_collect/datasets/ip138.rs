@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use reqwest::{self, Client};
-
+use log::*;
 use crate::utils::dns_handle::match_subdomains;
 
 pub async fn get_ip138_subdomains(domain: String) -> Vec<String> {
@@ -22,11 +22,11 @@ pub async fn get_ip138_subdomains(domain: String) -> Vec<String> {
                 subdomains = match_subdomains(domain.as_str(), &html);
             }
             Err(e) => {
-                eprintln!("Error reading response text: {}", e);
+                error!("Error reading response text: {}", e);
             }
         },
         Err(e) => {
-            eprintln!("Error making request: {:?}", e);
+            error!("Error making request: {:?}", e);
         }
     }
 

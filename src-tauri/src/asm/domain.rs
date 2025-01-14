@@ -27,11 +27,11 @@ pub async fn get_domains(
     let conn = Connection::open(db_path).unwrap();
 
     let base_sql = match dtype.as_str() {
-        "AAAA" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE aaa IS NOT NULL",
-        "CNAME" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE cname IS NOT NULL", 
-        "NS" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE ns IS NOT NULL",
-        "MX" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain WHERE mx IS NOT NULL",
-        _ => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM Domain"
+        "AAAA" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM domain WHERE aaa IS NOT NULL",
+        "CNAME" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM domain WHERE cname IS NOT NULL", 
+        "NS" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM domain WHERE ns IS NOT NULL",
+        "MX" => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM domain WHERE mx IS NOT NULL",
+        _ => "SELECT id,enterprise_id,domain,aaa,cname,ns,mx,create_at,update_at FROM domain"
     };
 
     let  sql: String ;
@@ -81,11 +81,11 @@ pub async fn get_domains(
 
     // 获取总记录数
     let count_sql = match dtype.as_str() {
-        "AAAA" => "SELECT count(*) FROM Domain WHERE aaa IS NOT NULL AND domain LIKE ? ",
-        "CNAME" => "SELECT count(*) FROM Domain WHERE cname IS NOT NULL AND domain LIKE ? ",
-        "NS" => "SELECT count(*) FROM Domain WHERE ns IS NOT NULL AND domain LIKE ? ",
-        "MS" => "SELECT count(*) FROM Domain WHERE mx IS NOT NULL AND domain LIKE ? ",
-        _ => "SELECT count(*) FROM Domain WHERE domain LIKE ? ",
+        "AAAA" => "SELECT count(*) FROM domain WHERE aaa IS NOT NULL AND domain LIKE ? ",
+        "CNAME" => "SELECT count(*) FROM domain WHERE cname IS NOT NULL AND domain LIKE ? ",
+        "NS" => "SELECT count(*) FROM domain WHERE ns IS NOT NULL AND domain LIKE ? ",
+        "MS" => "SELECT count(*) FROM domain WHERE mx IS NOT NULL AND domain LIKE ? ",
+        _ => "SELECT count(*) FROM domain WHERE domain LIKE ? ",
     };
 
     let mut count_stmt = conn.prepare(count_sql).unwrap();

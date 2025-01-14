@@ -28,6 +28,7 @@ export default {
 
   'asm.next-runtime':'下次运行时间',
 
+  'asm.website.screenshot':'截图',
   'asm.enterprise-info': '企业信息',
   'asm.add-enterprise': '新增企业',
   'asm.del-enterprise': '删除',
@@ -45,6 +46,8 @@ export default {
   'asm.root-domain.icp-no': 'ICP号',
   'asm.root-domain.subdomain-count': '子域名',
 
+
+  'asm.enterprise.run':'扫描',
   
 
   'asm.root-domain.enterprise_name': '企业名',

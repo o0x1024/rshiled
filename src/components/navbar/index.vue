@@ -30,17 +30,17 @@
             </template>
           </a-button>
         </a-tooltip>
-        <!-- <a-dropdown trigger="click" @select="changeLocale as any">
+        <a-dropdown trigger="click" @select="changeLocale as any">
           <div ref="triggerBtn" class="trigger-btn"></div>
-          <template #content> -->
-            <!-- <a-doption v-for="item in locales" :key="item.value" :value="item.value">
+          <template #content> 
+            <a-doption v-for="item in locales" :key="item.value" :value="item.value">
               <template #icon>
                 <icon-check v-show="item.value === currentLocale" />
               </template>
               {{ item.label }}
-            </a-doption> -->
-          <!-- </template>
-        </a-dropdown> -->
+            </a-doption> 
+          </template>
+        </a-dropdown>
       </li>
       <li>
         <a-tooltip :content="theme === 'light'
@@ -88,15 +88,15 @@
 import { computed, ref } from 'vue';
 import { useDark, useToggle } from '@vueuse/core';
 import { useAppStore } from '@/store';
-// import { LOCALE_OPTIONS } from '@/locale';
-// import useLocale from '@/hooks/locale';
+import { LOCALE_OPTIONS } from '@/locale';
+import useLocale from '@/hooks/locale';
 import Menu from '@/components/menu/index.vue';
 
 
 const appStore = useAppStore();
-// const { changeLocale, currentLocale } = useLocale();
+const { changeLocale, currentLocale } = useLocale();
 
-// const locales = [...LOCALE_OPTIONS];
+const locales = [...LOCALE_OPTIONS];
 
 const theme = computed(() => {
   return appStore.theme;

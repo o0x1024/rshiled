@@ -20,8 +20,9 @@ use plugin::plugin::{edit_plugin, get_plugins, new_plugin};
 use asm::{
     ips::get_ips,
     domain::get_domains,
-    enterprise::{get_enterprise_list,add_enterprise},
+    enterprise::{del_enterprise_by_id,get_enterprise_list,add_enterprise,switch_task_status,run_scan},
     rootdomain::{add_root_domain, del_rootdomain_by_id, get_ent_domain, get_root_domains},
+    website::get_websites
 };
 
 #[tauri::command]
@@ -46,7 +47,11 @@ pub fn run() {
             get_enterprise_list,
             add_root_domain,
             get_root_domains,
+            del_enterprise_by_id,
+            run_scan,
             add_enterprise,
+            switch_task_status,
+            get_websites,
             get_ent_domain,
             del_rootdomain_by_id,
             get_domains,
@@ -83,11 +88,6 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| match event {
-            // tauri::WindowEvent::Focused(focused) => {
-            //   if !focused {
-            //     window.hide().unwrap();
-            //   }
-            // }
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 window.hide().unwrap();
                 api.prevent_close();

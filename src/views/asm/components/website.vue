@@ -42,19 +42,33 @@
 			</a-col>
 		</a-row>
 
-		<a-table v-if="rdtype === 'all'" :columns="all_columns" :data="domains.list" :pagination="pagination" size='small'
+		<a-table v-if="rdtype === 'all'" :columns="all_columns" :data="website.list" :pagination="pagination" size='small'
+			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
+			<template #time="{ record }">
+				<template v-if="record.create_at != 0">创建: {{ formatDateTime(record.create_at) }}</template>
+				<template v-else>创建时间:--</template>
+				<br />
+				<template v-if="record.update_at != 0">更新: {{ formatDateTime(record.update_at) }}</template>
+				<template v-else>更新时间:--</template>
+			</template>
+			<template #title="{ record }">
+				<a-link  :href="record.url" target="_blank">{{ record.title }}</a-link>
+			</template>
+			<template #screenshot="{ record }">
+				<a-image width="50" :src="record.screenshot" alt="Base64 Image"  v-if="record.screenshot.length > 30" />
+			</template>
+
+		</a-table>
+		<a-table v-if="rdtype === 'status_code'" :columns="status_code_columns" :data="website.list" :pagination="pagination" size='small'
 			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
 		</a-table>
-		<a-table v-if="rdtype === 'status_code'" :columns="status_code_columns" :data="domains.list" :pagination="pagination" size='small'
+		<a-table v-if="rdtype === 'render_title'" :columns="render_title_columns" :data="website.list" :pagination="pagination" size='small'
 			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
 		</a-table>
-		<a-table v-if="rdtype === 'render_title'" :columns="render_title_columns" :data="domains.list" :pagination="pagination" size='small'
+		<a-table v-if="rdtype === 'server'" :columns="server_columns" :data="website.list" :pagination="pagination" size='small'
 			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
 		</a-table>
-		<a-table v-if="rdtype === 'server'" :columns="server_columns" :data="domains.list" :pagination="pagination" size='small'
-			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
-		</a-table>
-		<a-table v-if="rdtype === 'category_key'" :columns="category_key_columns" :data="domains.list" :pagination="pagination" size='small'
+		<a-table v-if="rdtype === 'category_key'" :columns="category_key_columns" :data="website.list" :pagination="pagination" size='small'
 			@page-change="onPageChange" @page-size-change="onPageSizeChange" :bordered="false" row-key="id">
 		</a-table>
 
@@ -69,12 +83,12 @@
 
 <script setup lang="ts">
 import { Pagination } from '@/types/global';
-// import { formatDateTime } from '@/utils/format';
+import { formatDateTime } from '@/utils/format';
 import { Message } from '@arco-design/web-vue';
 import { invoke } from '@tauri-apps/api/core';
-import { Domain } from 'domain';
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { WebSite } from './types';
 const { t } = useI18n();
 
 const pagination: Pagination = reactive({
@@ -87,41 +101,41 @@ const pagination: Pagination = reactive({
 	showSizeChanger: true,
 });
 
-const domains: { list: Domain[] } = reactive({ list: [] })
+const website: { list: WebSite[] } = reactive({ list: [] })
 const asset_status = ref('valid')
 const filterValue = ref('status_code')
 const search_key = ref('')
 const rdtype = ref('all')
 
 async function RefreshData() {
-	let res: any = await invoke("get_domain_list", { page: pagination.current, pagesize: pagination.pageSize });
-	if (res.code == 20000) {
-		domains.list = res.data
+	let res: any = await invoke("get_websites", {  page: pagination.current, pagesize: pagination.pageSize, dtype: rdtype.value ,query:search_key.value });
+	if (res) {
+		website.list = res.list
+		pagination.total = res.total
+
+		website.list.forEach((item) =>{
+			item.screenshot ='data:image/png;base64,'+ item.screenshot
+		})
 	}
 }
 
+
+onMounted(() => {
+	RefreshData()
+})
+
+
 const onRDTypeChange = async (value: string | number | boolean) => {
-	switch (value) {
-		case 'all':
-			let res: any = await invoke("get_root_domain_list", { page: pagination.current, pagesize: pagination.pageSize, group_by: 'all', status: asset_status.value, filter: [] });
-			if (res.code == 20000) {
-				domains.list = res.data
-			}
-			break
-		case 'icp':
-			res = await invoke("get_icp_enterprise_list", { page: pagination.current, pagesize: pagination.pageSize, group_by: 'all', status: asset_status.value, filter: [] });
-			if (res.code == 20000) {
-				domains.list = res.data
-			}
-			break
-	}
+	rdtype.value = value as string
+	RefreshData()
+
 }
 
 
 
 const onPageChange = (_page: number) => {
 	pagination.current = _page;
-
+	RefreshData()
 };
 
 const onPageSizeChange = (_pagesize: number) => {
@@ -144,23 +158,26 @@ const all_columns = computed(() => {
 	return [
 		{
 			title: t('asm.website.title'),
-			dataIndex: 'ip',
+			dataIndex: 'title',
+			slotName: 'title',
 		},
 		{
-			title: t('asm.website.status_code'),
-			dataIndex: 'website_no',
-		},
-		{
-			title: t('asm.website.server'),  //端口数
+			title: t('asm.website.server'),  
 			dataIndex: 'service',
 		},
 		{
 			title: t('asm.website.url'),
-			dataIndex: 'component',
+			dataIndex: 'url',
+		},
+		{
+			title: t('asm.website.screenshot'),
+			dataIndex: 'screenshot',
+			slotName: "screenshot",
 		},
 		{
 			title: t('asm.time'),
 			dataIndex: 'time',
+			slotName: 'time',
 		},
 		{
 			title: t('asm.operation'),
@@ -242,3 +259,12 @@ const category_key_columns = computed(() => {
 
 
 </script>
+
+<style lang="less" scoped>
+
+.screenshot-image {
+  width: 100px; /* 设置宽度 */
+  height: auto; /* 高度自动，保持纵横比 */
+}
+
+</style>

@@ -129,7 +129,6 @@ const paddingStyle = computed(() => {
 });
 
 const onMenuClick = (key: string) => {
-	console.log(key)
 	switch (key) {
 		case '1':
 			router.push({ name: "asm-dashboard" });

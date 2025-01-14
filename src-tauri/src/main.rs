@@ -4,12 +4,30 @@
 pub mod utils;
 pub mod plugin;
 
+use std::path::PathBuf;
+
+use log::*;
 use rshield_lib::{asm::asm_task::asm_init, config::config::AppConfig, database};
+use utils::{log_client::Client, logger::{Config, Logger}};
 
 #[tokio::main]
 async fn main() {
     // 初始化配置
+    let mut client = Client::new(true);
 
+    let logger = Logger::new(Config {
+        max_size: 1024 * 1024 * 5,
+        path: PathBuf::from("./rshiled.log"),
+        #[cfg(not(feature = "debug"))]
+        file_level: LevelFilter::Info,
+        #[cfg(feature = "debug")]
+        file_level: LevelFilter::Debug,
+        remote_level: LevelFilter::Error,
+        max_backups: 10,
+        compress: true,
+        client: Some(client.clone()),
+    });
+    set_boxed_logger(Box::new(logger)).unwrap();
 
     if utils::file::is_first_run() {
         //初始化数据库

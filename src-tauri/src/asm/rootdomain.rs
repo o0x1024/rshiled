@@ -34,7 +34,7 @@ pub async fn add_root_domain(
 
     for domain in root_domain {
         let mut stmt = conn
-            .prepare("SELECT name FROM Enterprise where id = ? ")
+            .prepare("SELECT name FROM enterprise where id = ? ")
             .unwrap();
         let enterprise_name: String = stmt.query_row([&enterprise_id], |row| row.get(0)).unwrap();
 
@@ -49,7 +49,7 @@ pub async fn add_root_domain(
             count: 0,
         };
         match conn.execute(
-			"INSERT INTO RootDomain (domain,enterprise_id,enterprise_name,create_at,update_at) VALUES (?1,?2,?3,?4,?5)",
+			"INSERT INTO rootdomain (domain,enterprise_id,enterprise_name,create_at,update_at) VALUES (?1,?2,?3,?4,?5)",
 			(&icpdomain.domain, &icpdomain.enterprise_id, &icpdomain.enterprise_name, &icpdomain.create_at, &icpdomain.update_at),
 		){
             Ok(_) => (),
@@ -66,7 +66,7 @@ pub async fn get_root_domains(page: usize, pagesize: usize) -> Result<serde_json
     let db_path = utils::file::get_db_path();
 
     let conn = Connection::open(db_path).unwrap();
-    let mut stmt = conn.prepare("SELECT * FROM RootDomain limit ?,?").unwrap();
+    let mut stmt = conn.prepare("SELECT * FROM rootdomain limit ?,?").unwrap();
     let root_domain_iter = stmt
         .query_map([(page - 1) * pagesize, pagesize], |row| {
             Ok(RootDomain {
@@ -91,7 +91,7 @@ pub async fn get_root_domains(page: usize, pagesize: usize) -> Result<serde_json
             }
         };
 
-        let count_sql = "SELECT count(*) FROM Domain where domain like ?";
+        let count_sql = "SELECT count(*) FROM domain where domain like ?";
         let pattern = format!("%{}", rd.domain.clone());
 
         let mut count_stmt = conn.prepare(count_sql).unwrap();
@@ -104,7 +104,7 @@ pub async fn get_root_domains(page: usize, pagesize: usize) -> Result<serde_json
     
 
     // 获取总记录数
-    let count_sql = "SELECT count(*) FROM RootDomain";
+    let count_sql = "SELECT count(*) FROM rootdomain";
     let mut count_stmt = conn.prepare(count_sql).unwrap();
     let total_count: isize = count_stmt.query_row([], |row| row.get(0)).unwrap(); // 获取总记录数
 
@@ -122,7 +122,7 @@ pub async fn get_ent_domain(page: usize, pagesize: usize) -> Result<Vec<EntInfo>
     let db_path = utils::file::get_db_path();
 
     let conn = Connection::open(db_path).unwrap();
-    let mut ent_stmt = conn.prepare("SELECT * FROM Enterprise LIMIT ?, ?").unwrap();
+    let mut ent_stmt = conn.prepare("SELECT * FROM enterprise LIMIT ?, ?").unwrap();
 
     let enterprise_iter = ent_stmt
         .query_map([(page - 1) * pagesize, pagesize], |row| {
@@ -130,8 +130,10 @@ pub async fn get_ent_domain(page: usize, pagesize: usize) -> Result<Vec<EntInfo>
                 id: row.get(0)?,
                 name: row.get(1)?,
                 monitor_status: row.get(2)?,
-                next_runtime: row.get(3)?,
-                running_status: row.get(4)?,
+                running_status: row.get(3)?,
+                next_run_time: row.get(4)?,
+                last_run_time: row.get(5)?,
+
             })
         })
         .unwrap();
@@ -145,7 +147,7 @@ pub async fn get_ent_domain(page: usize, pagesize: usize) -> Result<Vec<EntInfo>
                     count: 0,
                 };
                 let mut count_stmt = conn
-                    .prepare("SELECT COUNT(*) FROM Domain WHERE enterprise_id = ?")
+                    .prepare("SELECT COUNT(*) FROM domain WHERE enterprise_id = ?")
                     .unwrap();
                 let count: i64 = count_stmt
                     .query_row([enterprise.id], |row| row.get(0))
@@ -167,7 +169,7 @@ pub async fn get_ent_domain(page: usize, pagesize: usize) -> Result<Vec<EntInfo>
 pub async fn del_rootdomain_by_id(did: usize) {
     let db_path = utils::file::get_db_path();
     let conn = Connection::open(db_path).unwrap();
-    let sql = "DELETE FROM RootDomain WHERE id=?;";
+    let sql = "DELETE FROM rootdomain WHERE id=?;";
     match conn.execute(sql, &[&did]) {
         Ok(_) => (),
         Err(err) => println!("err:{:}", err),
