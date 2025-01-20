@@ -22,10 +22,10 @@ protobuf-codegen-pure = "2.3"
 [dependencies]
 tauri = { version = "2.1.1", features = ["tray-icon"] }
 reqwest = { version = "0.12.9", features = ["blocking"] }
-
+boa_engine = "0.20.0"
+boa_runtime = "0.20.0"
 select = "0.6"
 futures = "0.3"
-
 hex = "0.4"
 url = "2.2"
 base64 = "0.21"
@@ -38,13 +38,10 @@ pnet = "0.35.0"
 colored = "2.0"  
 byteorder = "1.4"  
 rand= "0.8.5"
-clap = { version = "4.5.13", features = ["derive"] }
 tokio = { version = "1.42.0", features = ["full"] }
 lazy_static = "1.4"
 chrono = "0.4.39"
 itertools = "0.13.0"
-crossbeam-channel = "0.5"
-deno_core = "0.327.0" 
 crossbeam = "0.8"
 regex = "1.11.1"
 trust-dns-resolver = "0.22"
@@ -54,7 +51,6 @@ flate2 = "1"
 log = { version = "0.4", features = ["std"] }
 protobuf = "2"
 parking_lot = "0.11"
-signal-hook = "0.3.14"
 libc = "0.2"
 
 

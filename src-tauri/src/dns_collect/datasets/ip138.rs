@@ -1,8 +1,8 @@
 use std::time::Duration;
 
-use reqwest::{self, Client};
-use log::*;
 use crate::utils::dns_handle::match_subdomains;
+use log::*;
+use reqwest::{self, Client};
 
 pub async fn get_ip138_subdomains(domain: String) -> Vec<String> {
     let mut subdomains = Vec::new();
@@ -32,3 +32,15 @@ pub async fn get_ip138_subdomains(domain: String) -> Vec<String> {
 
     subdomains
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_fuzzy_matching() {
+            println!("{:?}", get_ip138_subdomains("mgtv.com".to_string()).await);
+    }
+}
+
+//新建一个异步测试用例

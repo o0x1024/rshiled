@@ -243,7 +243,8 @@ impl Log for Logger {
             }
     }
     fn log(&self, record: &log::Record<'_>) {
-        if !record.target().starts_with("rshield") {            
+        println!("{}",record.target());
+        if !record.target().starts_with("rshield") {    
             return; // 忽略第三方依赖的日志
        }
 

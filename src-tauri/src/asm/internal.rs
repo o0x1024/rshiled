@@ -1,10 +1,10 @@
 
+use std::hash::DefaultHasher;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use base64::{Engine as _, engine::general_purpose};
 use headless_chrome::protocol::cdp::Page;
-use kv::Error;
-use reqwest::Client;
+use std::hash::{Hash, Hasher};use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use select::document::Document;
 use select::predicate::Attr;
@@ -266,6 +266,10 @@ async fn check_website(url: &str,client:Client,browser:&Browser) -> Option<WebSi
                 let doc = Document::from(body.as_str());
 
                 let favicon = doc.find(Attr("rel", "icon")).next().and_then(|node| node.attr("href"));
+                let mut  favicon_hash = String::new();
+                if let Some(fav) = favicon {
+                    favicon_hash = mmh3_hash32(fav)
+                }
                 let title = match doc.find(Name("title")).next(){
                     Some(node) =>{
                         node.text()
@@ -288,7 +292,7 @@ async fn check_website(url: &str,client:Client,browser:&Browser) -> Option<WebSi
                             id: None,
                             enterprise_id: 0,
                             url: url.to_string(),
-                            favicon: favicon.map(|s| s.to_string()),
+                            favicon: Some(favicon_hash),
                             title: Some(title),
                             headers: Some(headers),
                             finger: None,
@@ -350,6 +354,13 @@ async fn check_website(url: &str,client:Client,browser:&Browser) -> Option<WebSi
 
 
 
+fn mmh3_hash32(data: &str) -> String {
+    let mut hasher = DefaultHasher::new();
+    data.hash(&mut hasher);
+    format!("{:x}", hasher.finish())
+}
+
+
 fn headers_to_string(headers: &reqwest::header::HeaderMap) -> String {
     let mut result = String::new();
 
@@ -369,8 +380,7 @@ fn headers_to_string(headers: &reqwest::header::HeaderMap) -> String {
 
 #[cfg(test)]
 mod test{
-    
-    use super::*;
+
 
     #[tokio::test]
     async fn testssl() -> Result<(), Box<dyn std::error::Error>>{

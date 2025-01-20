@@ -1,5 +1,4 @@
 <template>
-
 	<a-space direction="vertical" fill>
 		<a-row justify="space-between">
 			<a-col :span="12">

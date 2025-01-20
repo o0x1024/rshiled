@@ -1,7 +1,4 @@
 use tauri::Manager;
-
-
-
 pub mod asm;
 pub mod config;
 pub mod database;
@@ -9,21 +6,23 @@ pub mod dns_collect;
 pub mod plugin;
 pub mod task;
 pub mod utils;
+
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
 };
 
-
-use plugin::plugin::{edit_plugin, get_plugins, new_plugin};
+use plugin::plugin::{save_plugin,get_plugin_from_id,del_plugins_by_id,edit_plugin,switch_plugins_status, get_plugin_list, new_plugin,get_plugin_type_list};
 
 use asm::{
     ips::get_ips,
     domain::get_domains,
     enterprise::{del_enterprise_by_id,get_enterprise_list,add_enterprise,switch_task_status,run_scan},
     rootdomain::{add_root_domain, del_rootdomain_by_id, get_ent_domain, get_root_domains},
-    website::get_websites
+    website::get_websites,
 };
+use utils::rs_test::{test_javascript};
+
 
 #[tauri::command]
 async fn close_splashscreen(window: tauri::Window) {
@@ -43,22 +42,30 @@ pub fn run() {
         // .menu()
         // .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
+            test_javascript,
             close_splashscreen,
+            save_plugin,
+            del_plugins_by_id,
             get_enterprise_list,
+            get_plugin_from_id,
+            switch_plugins_status,
+            get_plugin_type_list,
             add_root_domain,
             get_root_domains,
             del_enterprise_by_id,
             run_scan,
             add_enterprise,
             switch_task_status,
-            get_websites,
+            get_websites,   
             get_ent_domain,
             del_rootdomain_by_id,
             get_domains,
-            get_plugins,
+            get_plugin_list,
             new_plugin,
-            edit_plugin,
-            get_ips,
+            edit_plugin, 
+            get_ips, 
+
+
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

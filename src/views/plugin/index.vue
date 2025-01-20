@@ -1,10 +1,11 @@
 <template>
 	<a-layout class="layout">
 		<a-layout>
-			<a-layout-sider class="layout-sider" @collapse="setCollapsed"  :width="menuWidth" :style="{ paddingTop: '60px' }">
+			<a-layout-sider class="layout-sider" @collapse="setCollapsed" :width="menuWidth"
+				:style="{ paddingTop: '60px' }">
 				<div class="menu-wrapper">
-					<a-menu :style="{ height: 'calc(100% - 0px)' }"  @collapse="setCollapsed" @menu-item-click="onMenuClick" mode="pop"
-						showCollapseButton>
+					<a-menu :style="{ height: 'calc(100% - 0px)' }" @collapse="setCollapsed"
+						@menu-item-click="onMenuClick" mode="pop" showCollapseButton :selected-keys="selectedKeys">
 						<a-menu-item key="1">
 							<template #icon><icon-dashboard></icon-dashboard></template>
 							{{ $t('plugin.list') }}
@@ -13,7 +14,7 @@
 							<template #icon><icon-book /></template>
 							{{ $t('scan.passive_scan') }}
 						</a-menu-item> -->
-						
+
 					</a-menu>
 				</div>
 			</a-layout-sider>
@@ -26,14 +27,15 @@
 
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { computed, ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+
 
 
 let menuCollapse = ref(false)
 let mwidth = 180
 const menuWidth = computed(() => {
-	return menuCollapse.value? 48:mwidth;
+	return menuCollapse.value ? 48 : mwidth;
 });
 
 const setCollapsed = (val: boolean) => {
@@ -42,6 +44,8 @@ const setCollapsed = (val: boolean) => {
 };
 
 const router = useRouter()
+const route = useRoute()
+
 
 const paddingStyle = computed(() => {
 	const paddingLeft = { paddingLeft: '220px' }
@@ -50,11 +54,63 @@ const paddingStyle = computed(() => {
 	return { ...paddingLeft, ...paddingTop, ...paddingRight };
 });
 
+
+const selectedKeys = ref<string[]>([])
+
+
+// 根据当前路由设置 selectedKeys
+const updateSelectedKeys = () => {
+	const routeName = route.name
+	switch (routeName) {
+		case 'plugin-list':
+			selectedKeys.value = ['1']
+			break
+		case 'asm-scan-object':
+			selectedKeys.value = ['2']
+			break
+		case 'asm-root-domain':
+			selectedKeys.value = ['3']
+			break
+		case 'asm-domain':
+			selectedKeys.value = ['4']
+			break
+		case 'asm-ip':
+			selectedKeys.value = ['5']
+			break
+		case 'asm-port':
+			selectedKeys.value = ['6']
+			break
+		case 'asm-website':
+			selectedKeys.value = ['7']
+			break
+		case 'asm-web-component':
+			selectedKeys.value = ['8']
+			break
+		case 'asm-risk':
+			selectedKeys.value = ['9']
+			break
+		default:
+			selectedKeys.value = []
+	}
+}
+
+// 监听路由变化，更新 selectedKeys
+watch(() => route.name, () => {
+	updateSelectedKeys()
+})
+
+
+onMounted(() => {
+	// 初始化时设置 selectedKeys
+	updateSelectedKeys()
+
+})
+
 const onMenuClick = (key: string) => {
 	console.log(key)
 	switch (key) {
 		case '1':
-			router.push({ name: "asm-dashboard" });
+			router.push({ name: "plugin-list" });
 			break
 		case '2':
 			router.push({ name: "asm-scan-object" });

@@ -1,78 +1,79 @@
 <template>
-	<a-row justify="space-between">
-		<a-col :span="12">
-			<a-radio-group type="button" @change="onGroupByChange" v-model:model-value="group_by">
-				<a-radio value="all">{{ $t('asm.all') }}</a-radio>
-				<a-radio value="ent">{{ $t('root-domain.enterprise') }}</a-radio>
-			</a-radio-group>
-		</a-col>
-		<a-col :span="12">
-			<a-row justify="end">
-				<a-col :span="13">
-					<a-space>
-						<a-button style="width: 95px;" type="primary" @click="onExport">{{ $t('asm.export')
-							}}</a-button>
-						<a-button style="width: 95px;" type="primary" @click="onAddDomain">{{
-							$t('asm.root-domain.add-domain') }}</a-button>
-						<a-select v-model="asset_status">
-							<a-option value="valid">现存资产</a-option>
-							<a-option value="invalid">历史资产</a-option>
-							<a-option value="ignored">白名单</a-option>
-						</a-select>
-					</a-space>
-				</a-col>
-			</a-row>
-
-		</a-col>
-	</a-row>
-	<a-row style="margin-top: 20px; ">
-		<a-col :span="24">
-			<template v-if="group_by === 'all'">
-
-				<a-table :columns="all_columns" :bordered="false" :data="rtds.list" :pagination="pagination" :scroll="scroll"
-					@page-change="onPageChange" size="small">
-					<template #operation="{ record }">
+	<a-space direction="vertical" fill>
+		<a-row justify="space-between">
+			<a-col :span="12">
+				<a-radio-group type="button" @change="onGroupByChange" v-model:model-value="group_by">
+					<a-radio value="all">{{ $t('asm.all') }}</a-radio>
+					<a-radio value="ent">{{ $t('root-domain.enterprise') }}</a-radio>
+				</a-radio-group>
+			</a-col>
+			<a-col :span="12">
+				<a-row justify="end">
+					<a-col :span="13">
 						<a-space>
-							<a-popconfirm content="确认删除么?" @ok="onRootDomainDel(record.id)">
-								<a-link size="small" type="primary" status="danger">{{
-									$t('asm.del-enterprise') }}</a-link>
-							</a-popconfirm>
+							<a-button style="width: 95px;" type="primary" @click="onExport">{{ $t('asm.export')
+								}}</a-button>
+							<a-button style="width: 95px;" type="primary" @click="onAddDomain">{{
+								$t('asm.root-domain.add-domain') }}</a-button>
+							<a-select v-model="asset_status">
+								<a-option value="valid">现存资产</a-option>
+								<a-option value="invalid">历史资产</a-option>
+								<a-option value="ignored">白名单</a-option>
+							</a-select>
 						</a-space>
-					</template>
+					</a-col>
+				</a-row>
 
-					<template #name="{ record }">
-						<template v-if="record.name">{{ record.name }}</template>
-						<template v-else>--</template>
-					</template>
-					<template #subdomain_count="{ record }">
-						<template v-if="record.subdomain_count">{{ record.subdomain_count }}</template>
-						<template v-else>--</template>
-					</template>
-					<template #time="{ record }">
-						<template v-if="record.create_at != 0">创建: {{ formatDateTime(record.create_at) }}</template>
-						<template v-else>创建时间:--</template>
-						<br />
-						<template v-if="record.update_at != 0">更新: {{ formatDateTime(record.update_at) }}</template>
-						<template v-else>更新时间:--</template>
-					</template>
-					<template #count="{ record }">
-						<a-link @click="toDomain(record.domain)">{{ record.count }}</a-link>
-					</template>
-				</a-table>
-			</template>
-			<template v-else>
-				sdfsdf
-				<a-table :columns="icp_columns" :bordered="false" :data="etp_domain.list" :pagination="pagination"
-					@page-change="onPageChange" size="small">
+			</a-col>
+		</a-row>
+		<a-row>
+			<a-col :span="24">
+				<template v-if="group_by === 'all'">
 
-					<template #count="{ record }">
-						<a-tag color="green" >{{ record.count }}</a-tag>
-					</template>
-				</a-table>
-			</template>
-		</a-col>
-	</a-row>
+					<a-table :columns="all_columns" :bordered="false" :data="rtds.list" :pagination="pagination"
+						:scroll="scroll" @page-change="onPageChange" size="small">
+						<template #operation="{ record }">
+							<a-space>
+								<a-popconfirm content="确认删除么?" @ok="onRootDomainDel(record.id)">
+									<a-link size="small" type="primary" status="danger">{{
+										$t('asm.del-enterprise') }}</a-link>
+								</a-popconfirm>
+							</a-space>
+						</template>
 
+						<template #name="{ record }">
+							<template v-if="record.name">{{ record.name }}</template>
+							<template v-else>--</template>
+						</template>
+						<template #subdomain_count="{ record }">
+							<template v-if="record.subdomain_count">{{ record.subdomain_count }}</template>
+							<template v-else>--</template>
+						</template>
+						<template #time="{ record }">
+							<template v-if="record.create_at != 0">创建: {{ formatDateTime(record.create_at) }}</template>
+							<template v-else>创建时间:--</template>
+							<br />
+							<template v-if="record.update_at != 0">更新: {{ formatDateTime(record.update_at) }}</template>
+							<template v-else>更新时间:--</template>
+						</template>
+						<template #count="{ record }">
+							<a-link @click="toDomain(record.domain)">{{ record.count }}</a-link>
+						</template>
+					</a-table>
+				</template>
+				<template v-else>
+					sdfsdf
+					<a-table :columns="icp_columns" :bordered="false" :data="etp_domain.list" :pagination="pagination"
+						@page-change="onPageChange" size="small">
+
+						<template #count="{ record }">
+							<a-tag color="green">{{ record.count }}</a-tag>
+						</template>
+					</a-table>
+				</template>
+			</a-col>
+		</a-row>
+	</a-space>
 	<a-modal v-model:visible="add_visible" title-align="start" @ok="handleOk" @cancel="handleCancel">
 		<template #title>
 			{{ $t('asm.root-domain.add-asset') }}
@@ -84,7 +85,7 @@
 					<a-option :value="item.id">{{ item.name }}</a-option>
 				</template>
 			</a-select>
-			<a-textarea :style="{ width: '320px' }" v-model:model-value="textare_domains" 
+			<a-textarea :style="{ width: '320px' }" v-model:model-value="textare_domains"
 				:placeholder="$t('asm.root-domain.add-asset-placeholder')" allow-clear auto-size />
 		</a-space>
 	</a-modal>
@@ -138,12 +139,12 @@ const onPageChange = (_page: number) => {
 
 
 const scroll = {
-  y: 900
+	y: 900
 }
 
 async function RefreshData() {
-	await invoke("get_root_domains", { page: pagination.current, pagesize: pagination.pageSize }).then((res:any) =>{
-		if(res){
+	await invoke("get_root_domains", { page: pagination.current, pagesize: pagination.pageSize }).then((res: any) => {
+		if (res) {
 			rtds.list = res.list
 			pagination.total = res.total
 		}
@@ -260,7 +261,7 @@ const all_columns = computed(() => {
 			title: t('asm.time'),
 			dataIndex: 'time',
 			slotName: 'time',
-			width:210
+			width: 210
 		},
 		{
 			title: t('asm.operation'),

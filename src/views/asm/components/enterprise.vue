@@ -1,42 +1,43 @@
 <template>
-	<a-row justify="space-between">
-		<a-col :span="12">
-			<a-typography-text style="font-size: large; font-weight: 540;">{{ $t('asm.enterprise-info')
-				}}</a-typography-text>
-		</a-col>
-		<a-col :span="12">
-			<a-row justify='end'>
-				<a-col :span="4">
-					<a-button style="width: 95px;" type="primary" @click="onAdd">{{ $t('asm.add-enterprise')
-						}}</a-button>
-				</a-col>
-			</a-row>
-		</a-col>
-	</a-row>
-	<a-row style="margin-top:20px">
-		<a-col :span="24">
-			<a-table :columns="columns" :bordered="false" :data="enterprise.list" :pagination="pagination"
-				@page-change="onPageChange" size="small">
+	<a-space direction="vertical" fill>
+		<a-row justify="space-between">
+			<a-col :span="12">
+				<a-typography-text style="font-size: large; font-weight: 540;">{{ $t('asm.enterprise-info')
+					}}</a-typography-text>
+			</a-col>
+			<a-col :span="12">
+				<a-row justify='end'>
+					<a-col :span="4">
+						<a-button style="width: 95px;" type="primary" @click="onAdd">{{ $t('asm.add-enterprise')
+							}}</a-button>
+					</a-col>
+				</a-row>
+			</a-col>
+		</a-row>
+		<a-row>
+			<a-col :span="24">
+				<a-table :columns="columns" :bordered="false" :data="enterprise.list" :pagination="pagination"
+					@page-change="onPageChange" size="small">
 
-				<template #monitor_status="{ record }">
-					<a-switch v-model="record.monitor_status" :checked-value="1" :unchecked-value="0"
-						@change="onSwitchChange(record.id, record.monitor_status)" />
-				</template>
+					<template #monitor_status="{ record }">
+						<a-switch v-model="record.monitor_status" :checked-value="1" :unchecked-value="0"
+							@change="onSwitchChange(record.id, record.monitor_status)" />
+					</template>
 
-				<template #running_status="{ record }">
-					<a-tag color="green">{{ record.running_status }}</a-tag>
-				</template>
-
-
-				<template #time="{ record }">
-					<a-space direction="vertical" fill>
-						<span color="green">运行间隔时间:{{ formatTime(record.next_run_time) }}</span>
-						<span color="green">最近运行时间:{{ formatDateTime(record.last_run_time) }}</span>
-					</a-space>
-				</template>
+					<template #running_status="{ record }">
+						<a-tag color="green">{{ record.running_status }}</a-tag>
+					</template>
 
 
-				<template #operation="{ record }">
+					<template #time="{ record }">
+						<a-space direction="vertical" fill>
+							<span color="green">运行间隔时间:{{ formatTime(record.next_run_time) }}</span>
+							<span color="green">最近运行时间:{{ formatDateTime(record.last_run_time) }}</span>
+						</a-space>
+					</template>
+
+
+					<template #operation="{ record }">
 						<a-dropdown>
 							<div class="clickable"><icon-more /></div>
 							<template #content>
@@ -44,27 +45,21 @@
 									<template #icon>
 										<icon-search />
 									</template>
-									<template #default>{{$t('asm.enterprise.run') }}</template>
+									<template #default>{{ $t('asm.enterprise.run') }}</template>
 								</a-doption>
 								<a-doption @click="onDel(record.id)">
 									<template #icon>
 										<icon-delete />
 									</template>
-									<template #default>{{$t('asm.del-enterprise') }}</template>
+									<template #default>{{ $t('asm.del-enterprise') }}</template>
 								</a-doption>
 							</template>
 						</a-dropdown>
-					<!-- <a-space>
-						<a-popconfirm content="确认删除么?" @ok="onDel(record.id)">
-							<a-link size="small" type="primary" status="danger">{{
-								$t('asm.del-enterprise') }}</a-link>
-						</a-popconfirm>
-					</a-space> -->
-				</template>
-			</a-table>
-		</a-col>
-	</a-row>
-
+					</template>
+				</a-table>
+			</a-col>
+		</a-row>
+	</a-space>
 	<a-modal v-model:visible="add_visible" title-align="start" @ok="handleOk" @cancel="handleCancel">
 		<template #title>
 			{{ $t('asm.add-enterprise-model') }}
@@ -83,7 +78,7 @@
 
 <script lang="ts" setup>
 import { formatDateTime, formatTime } from '@/utils/format';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref,onBeforeUnmount } from 'vue';
 import { Pagination } from '@/types/global';
 import { Enterprise } from './types';
 import { invoke } from "@tauri-apps/api/core";
@@ -147,12 +142,22 @@ onMounted(() => {
 	startPolling();
 })
 
+let pollingInterval:any;
+
+onBeforeUnmount(()=> { 
+    if (pollingInterval) {
+      clearInterval(pollingInterval); // 清除定时器
+      pollingInterval = null;
+    }
+})
 
 function startPolling() {
-	setInterval(() => {
+	pollingInterval = setInterval(() => {
 		RefreshData() // 定期请求数据
 	}, 3000); // 每 5 秒请求一次
 }
+
+
 const onDel = async (eid: string) => {
 	await invoke("del_enterprise_by_id", { eid: eid }).then((res: any) => {
 		if (res) {
@@ -185,9 +190,9 @@ const onSwitchChange = async (eid: number, status: any) => {
 
 
 
-const onRun = async (eid:any) =>{
+const onRun = async (eid: any) => {
 	Message.info("开始扫描,如有异常,请查看日志信息")
-	await invoke("run_scan", { eid: eid}).then((res: any) => {
+	await invoke("run_scan", { eid: eid }).then((res: any) => {
 		if (res) {
 			Message.success("切换成功")
 		}
