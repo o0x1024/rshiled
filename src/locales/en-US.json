@@ -1,0 +1,71 @@
+{
+  "vuln": {
+    "exploit": {
+      "title": "Vulnerability Exploitation",
+      "pluginList": "Plugin List",
+      "pluginListTip": "Select a plugin to exploit vulnerabilities",
+      "searchPlaceholder": "Search plugins",
+      "pluginDetail": "Plugin Details",
+      "basicInfo": "Basic Information",
+      "parameters": "Parameters",
+      "advancedOptions": "Advanced Options",
+      "target": "Target",
+      "targetPlaceholder": "Enter target URL or IP",
+      "proxyUrl": "Proxy URL",
+      "proxyUrlPlaceholder": "HTTP proxy URL, e.g., http://127.0.0.1:8080",
+      "selectFile": "Select File",
+      "execute": "Execute",
+      "result": "Result",
+      "executeSuccess": "Execution Completed",
+      "vulnerable": "Vulnerable!",
+      "notVulnerable": "Not Vulnerable",
+      "data": "Parsed Data",
+      "details": "Raw Details",
+      "executeError": "Error during execution",
+      "executeFailed": "Failed to execute",
+      "vulnerableFound": "Vulnerability detected!",
+      "targetRequired": "Please enter a target",
+      "fetchError": "Failed to fetch plugins",
+      "selectPluginTip": "Please select a plugin from the list",
+      "requestResponse": "HTTP Traffic",
+      "request": "HTTP Request",
+      "response": "HTTP Response",
+      "noRequestData": "No HTTP request data available. The plugin may not have sent an HTTP request or the backend did not capture it.",
+      "noResponseData": "No HTTP response data available. The plugin may not have received an HTTP response or the backend did not capture it.",
+      "noData": "No data available",
+      "noDetails": "No details available",
+      "httpStatus": "Status",
+      "httpHeaders": "Headers",
+      "httpBody": "Body",
+      "httpMethod": "Method",
+      "httpUrl": "URL",
+      "httpVersion": "HTTP Version",
+      "httpTime": "Response Time",
+      "httpSize": "Size"
+    },
+    "plugin": {
+      "type": "Type",
+      "severity": "Severity",
+      "author": "Author",
+      "version": "Version",
+      "references": "References"
+    },
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "info": "Info"
+    },
+    "pluginType": {
+      "rce": "Remote Code Execution",
+      "deserialization": "Deserialization",
+      "injection": "Injection",
+      "xss": "Cross-Site Scripting",
+      "ssrf": "Server-Side Request Forgery",
+      "file": "File Exploitation",
+      "info": "Information Disclosure",
+      "other": "Other"
+    }
+  }
+} 

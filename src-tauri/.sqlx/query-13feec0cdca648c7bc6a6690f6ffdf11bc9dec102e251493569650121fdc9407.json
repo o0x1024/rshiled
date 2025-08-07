@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS webcomp (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,\n            task_id  INTEGER NOT NULL,\n            website  TEXT,\n            comp_name TEXT,\n            ctype TEXT,\n            create_at INTEGER,\n            update_at INTEGER,\n            UNIQUE (comp_name, website)\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "13feec0cdca648c7bc6a6690f6ffdf11bc9dec102e251493569650121fdc9407"
+}

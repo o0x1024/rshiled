@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                            INSERT INTO webcomp (task_id, website,comp_name,update_at)\n                            VALUES (?, ?, ?,?)\n                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "6952eeb768edd2bdca8d1651c9fd5a53a3286c3c81a9a290ea711ede3a6fca7f"
+}

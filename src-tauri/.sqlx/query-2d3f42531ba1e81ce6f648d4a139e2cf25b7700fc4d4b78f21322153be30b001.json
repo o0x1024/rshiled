@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS ips (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,\n            task_id  INTEGER NOT NULL,\n            ip_addr  TEXT,\n            domain TEXT,\n            port_count INTEGER,\n            create_at INTEGER,\n            update_at INTEGER,\n            UNIQUE (ip_addr)\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "2d3f42531ba1e81ce6f648d4a139e2cf25b7700fc4d4b78f21322153be30b001"
+}

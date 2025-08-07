@@ -1,0 +1,93 @@
+{
+  "vuln": {
+    "exploit": {
+      "title": "漏洞利用",
+      "pluginList": "插件列表",
+      "pluginListTip": "选择一个插件来利用漏洞",
+      "searchPlaceholder": "搜索插件",
+      "pluginDetail": "插件详情",
+      "basicInfo": "基本信息",
+      "parameters": "参数",
+      "advancedOptions": "高级选项",
+      "target": "目标",
+      "targetPlaceholder": "输入目标URL或IP",
+      "proxyUrl": "代理URL",
+      "proxyUrlPlaceholder": "HTTP代理URL，例如http://127.0.0.1:8080",
+      "selectFile": "选择文件",
+      "execute": "执行",
+      "result": "结果",
+      "executeSuccess": "执行完成",
+      "vulnerable": "存在漏洞！",
+      "notVulnerable": "不存在漏洞",
+      "data": "解析数据",
+      "details": "原始详情",
+      "executeError": "执行过程中出错",
+      "executeFailed": "执行失败",
+      "vulnerableFound": "检测到漏洞！",
+      "targetRequired": "请输入目标",
+      "fetchError": "获取插件失败",
+      "selectPluginTip": "请从列表中选择一个插件",
+      "requestResponse": "HTTP 流量",
+      "request": "HTTP 请求",
+      "response": "HTTP 响应",
+      "noRequestData": "无HTTP请求数据。插件可能未发送HTTP请求或后端未捕获请求内容。",
+      "noResponseData": "无HTTP响应数据。插件可能未收到HTTP响应或后端未捕获响应内容。",
+      "noData": "无数据",
+      "noDetails": "无详细信息",
+      "httpStatus": "状态码",
+      "httpHeaders": "请求头",
+      "httpBody": "请求体",
+      "httpMethod": "请求方法",
+      "httpUrl": "URL地址",
+      "httpVersion": "HTTP版本",
+      "httpTime": "响应时间",
+      "httpSize": "大小"
+    },
+    "plugin": {
+      "type": "类型",
+      "severity": "严重程度",
+      "author": "作者",
+      "version": "版本",
+      "references": "参考资料"
+    },
+    "severity": {
+      "critical": "严重",
+      "high": "高危",
+      "medium": "中危",
+      "low": "低危",
+      "info": "信息"
+    },
+    "pluginType": {
+      "rce": "远程代码执行",
+      "deserialization": "反序列化",
+      "injection": "注入",
+      "xss": "跨站脚本",
+      "ssrf": "服务端请求伪造",
+      "file": "文件利用",
+      "info": "信息泄露",
+      "other": "其他"
+    }
+  },
+  "scan": {
+    "proxy_cert": {
+      "title": "代理证书管理",
+      "cert_info": "证书信息",
+      "status": "安装状态",
+      "installed": "已安装",
+      "not_installed": "未安装",
+      "unknown": "未知",
+      "path": "证书路径",
+      "tls_status": "TLS状态",
+      "tls_enabled": "已启用",
+      "tls_disabled": "已禁用",
+      "install_cert": "安装证书",
+      "refresh": "刷新状态",
+      "open_cert": "打开证书",
+      "instructions_title": "安装指南",
+      "export_failed": "导出证书失败",
+      "status_refreshed": "状态已刷新",
+      "cert_dialog_title": "证书位置",
+      "cert_dialog_message": "证书已导出至"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS config (\n            dns_collection_brute_status INTEGER NOT NULL DEFAULT 0,\n            dns_collection_plugin_status INTEGER NOT NULL DEFAULT 0,\n            proxy TEXT,\n            user_agent TEXT,\n            http_headers TEXT\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "ca5f7ffe230b87e29aabe7f50115b3dd7e2157b3df1ed2663f59b8d099831934"
+}

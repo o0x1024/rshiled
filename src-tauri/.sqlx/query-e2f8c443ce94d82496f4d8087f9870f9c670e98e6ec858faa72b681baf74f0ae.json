@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS website (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,\n            url  TEXT NOT NULL ,\n            task_id  INTEGER NOT NULL,\n            favicon  TEXT,\n            title TEXT,\n            status_code INTEGER,\n            headers TEXT,\n            finger TEXT,\n            screenshot TEXT,\n            tags TEXT,\n            ssl_info TEXT,\n            create_at INTEGER,                                      \n            update_at INTEGER,\n            UNIQUE (url)\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "e2f8c443ce94d82496f4d8087f9870f9c670e98e6ec858faa72b681baf74f0ae"
+}

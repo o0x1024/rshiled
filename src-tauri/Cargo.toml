@@ -1,0 +1,253 @@
+[package]
+name = "rshield"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "rshield_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+
+[dependencies]
+ysoserial-rs = { path = "src/internal/ysoserial-rs" }
+engine = { path = "src/internal/finger/engine" }
+observer_ward = { path = "src/internal/finger/observer_ward" }
+
+tauri = { version = "2.1.1", features = ["tray-icon"] }
+reqwest = { version = "0.12.9", features = ["blocking", "rustls-tls", "json" ] }
+
+# 暴力破解模块所需依赖
+ssh2 = "0.9.4"
+mysql = "24.0.0"
+suppaftp = "6.2.1"
+# pavao = "0.2.12" # 使用pavao库支持SMB协议
+redis = { version = "0.23", features = ["tokio-comp"] }
+tiberius = { version = "0.12", features = ["chrono", "rust_decimal"] }
+tokio-postgres = { version = "0.7", features = ["with-chrono-0_4"] }
+
+select = "0.6"
+futures = "0.3"
+hex = "0.4"
+url = { version = "2.2", features = ["serde"] }
+base64 = "0.22.1"
+native-tls = "0.2"
+openssl = { version = "0.10.57", features = ["vendored"] }
+rusqlite = { version = "0.32.0", features = ["bundled"] }
+pnet = "0.35.0"
+colored = "2.0"  
+byteorder = "1.4"  
+rand = { version = "0.8.5", default-features = false, features = ["getrandom"] }
+tokio-tungstenite = "0.17"
+chrono = { version = "0.4.39", features = ["serde"] }
+crossbeam = "0.8"
+regex = "1.10.2"
+trust-dns-resolver = "0.22"
+tauri-plugin-log = "2"
+headless_chrome = "=1.0.16"
+log = { version = "0.4", features = ["std"] }
+protobuf = "2"
+parking_lot = "0.11"
+libc = "0.2"
+sqlx = { version = "0.8.3", features = ["sqlite", "runtime-tokio-native-tls",] }
+smol = "2.0.2"
+isahc = "1.7.2"
+crossbeam-channel = "0.5"
+tauri-plugin-websocket = { version = "2.3.0" }
+pistol = "^3"
+
+tokio-native-tls = "0.3"
+tokio = { version = "1.42.0", features = ["full", "signal"] }
+
+serde_json = "1"
+lazy_static = "1.4"
+serde = { version = "1.0.217", features = ["derive"] }
+once_cell= "1.20.3"
+scraper= "0.23.1"  
+argh = "0.1.13"
+serde_yaml = "0.9"
+dirs = "6.0.0"
+threadpool = "1.8.1"
+thiserror = "2"
+env_logger = { version = "0.11.6", default-features = false, features = [
+  "auto-color",
+] }
+console = "0.15.10"
+zip = { version = "2.2.2", default-features = false, features = ["deflate"] }
+actix-web-httpauth = "0.8.1"
+actix-web = { version = "4.9.0", default-features = false, features = [
+  "macros",
+  "compress-gzip",
+  "openssl",
+] }
+
+oxc_allocator = "0.65.0"
+oxc_index="3.0.0"
+oxc_parser = "0.65.0"
+oxc_span = "0.65.0"
+oxc_ast="0.65.0"
+oxc_ast_visit="0.65.0"
+spider="2.36.90"
+
+
+tokio-rustls = { version = "0.23", features = ["dangerous_configuration"] }
+webpki = "0.22"
+webpki-roots = "0.26.8"
+http = "1.3.1"
+
+httparse = "1.8"
+
+async-compression = { version = "0.4", features = ["tokio", "gzip"] }
+flate2 = "1.1.0"
+
+# 命令行参数解析
+clap = { version = "4.3", features = ["derive"] }
+anyhow = "1.0"
+color-eyre = "0.6"
+config = "0.13"
+
+
+# HTML解析
+html5ever = "0.26"
+markup5ever = "0.11"
+kuchiki = "0.8"
+fern = "0.6"
+# SQL解析
+sqlparser = "0.55.0"
+
+# 并发和异步
+async-trait = "0.1"
+tokio-util = { version = "0.7", features = ["full"] }
+
+# URL处理
+urlencoding = "2.1.3"
+
+walkdir = "2.3"
+
+# 证书处理相关
+rcgen = "0.11"
+rustls-pemfile = "1.0"
+
+# 添加socket2依赖用于跨平台套接字处理
+socket2 = "0.5.5"
+
+time = { version = "0.3", features = ["std"] }
+uuid = { version = "1.4", features = ["v4", "serde"] }
+
+cipher = "0.4"
+# 正则表达式处理
+fancy-regex = { version = "0.14.0", default-features = false, features = [
+  "std",
+  "unicode",
+  "perf",
+] }
+jsonpath-rust = "1.0.1"
+rustc_lexer = "0.1.0"
+slinger = { version = "0.1.14", features = [
+  "serde",
+  "cookie",
+  "tls",
+  "charset",
+  "gzip",
+] }
+md-5 = "0.10.6"
+tl = "0.7.8"
+mime = "0.3.17"
+tauri-plugin-dialog = "2.2.1"
+
+
+aes = "0.8"
+rhai = { version = "1.16.1", features = ["sync", "serde"] }
+tempfile = "3.8"
+bytes = "1.10.1"
+h2 = "0.4.9"
+sha1 = "0.10.6"
+cbc = "0.1"
+getrandom = { version = "0.2", features = ["js"] } 
+block-modes = "0.9" # For CBC mode and padding
+
+
+# HTTP(S)代理相关
+hyper = { version = "1.6.0", features = ["full"] }
+hyper-tls = "0.6"
+
+
+hudsucker = { git = "https://github.com/omjadas/hudsucker.git", features = ["full"] }
+http-body-util = "0.1.3"
+
+
+# deno_core = "0.344.0"
+# deno_error = "0.5.6"
+
+[target.'cfg(target_os="windows")'.build-dependencies]
+winres = "0.1"
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+daemonize = "0.5.0"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-cli = "2.0.0"
+tauri-plugin-fs = "2.0.0"
+tauri-plugin-autostart = "2.0.0"
+tauri-plugin-single-instance = "2"
+
+[dependencies.windows]
+version = "0.58.0"
+features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_Services",
+    "Win32_System_Kernel",
+    "Win32_System_JobObjects",
+    "Win32_System_Memory",
+    "Win32_System_Threading",
+    "Win32_System_Diagnostics",
+    "Win32_System_Diagnostics_ToolHelp", 
+    "Win32_System_Diagnostics_Debug_Extensions",
+]
+
+
+[dev-dependencies]
+similar = "2.0"
+strsim = "0.11.1"
+criterion = "0.5"
+tokio-test = "0.4"
+mockito = "1.1"
+tempfile = "3.8"
+
+
+
+[features]
+default = ["local-proxy"]
+# 注册表提供
+enable-register = []
+# 添加proxy
+local-proxy = []
+
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+panic = "abort"
+strip = true
+
+# HTTP/2相关依赖
+# h2 = "0.3.24"
+# tokio-rustls = "0.23"
+# rustls = { version = "0.20.9", features = ["dangerous_configuration"] }
+# webpki = "0.22"
+# webpki-roots = "0.22"
+# bytes = "1.5.0"
+# futures = "0.3"
+

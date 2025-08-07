@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS domain (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,  \n            task_id INTEGER,  \n            domain  TEXT NOT NULL,\n            aaa  TEXT,\n            cname TEXT,\n            ns TEXT,\n            mx TEXT,\n            create_at INTEGER,\n            update_at INTEGER,\n            UNIQUE (domain)\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "3f6bc56025cc517deb0fb56f0a2baecaeb5e881d75f1734265b3f51f64a5d85e"
+}

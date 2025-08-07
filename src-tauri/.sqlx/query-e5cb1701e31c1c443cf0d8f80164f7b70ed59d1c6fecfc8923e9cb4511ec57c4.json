@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS port (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,\n            ips_id INTEGER NOT NULL,\n            task_id  INTEGER NOT NULL,\n            port TEXT,\n            create_at INTEGER,                                      \n            update_at INTEGER\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "e5cb1701e31c1c443cf0d8f80164f7b70ed59d1c6fecfc8923e9cb4511ec57c4"
+}

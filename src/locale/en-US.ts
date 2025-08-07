@@ -1,0 +1,81 @@
+/** simple end */
+import localeSettings from './en-US/settings';
+import ASMSettings from '@/views/asm/locale/en-US'
+import SCANSettings from '@/views/scan/locale/en-US';
+import VULNSettings from '@/views/vuln/locale/en-US';
+import Setting from '@/views/setting/locale/en-US';
+import PROXYSettings from '@/views/proxy/locale/en-US';
+import REPEATERSettings from '@/components/repeater/locale/en-US';
+import BRUTESettings from '@/views/brute/locale/en-US';
+export default {
+  'menu.asm': 'ASM',
+  'menu.vuln': 'Vulnerability',
+  'menu.scan': 'Scan',
+  'menu.scan.passive': 'Passive Scan',
+  'menu.scan.active': 'Active Scan',
+  'menu.proxy': 'Proxy',
+  'menu.brute': 'Brute',
+  'menu.setting': 'System',
+  'menu.plugin': 'Plugin',
+  'menu.plugins': 'Plugins',
+  'menu.plugins.management': 'Plugin Management',
+  'menu.plugins.update': 'Plugin Update',
+  'menu.status': 'Status',
+  'navbar.action.locale': "English",
+  'menu.repeater': 'Repeater',
+
+  ...REPEATERSettings,
+  ...Setting,
+  ...localeSettings,
+  ...ASMSettings,
+  ...SCANSettings,
+  ...VULNSettings,
+  ...BRUTESettings,
+  ...PROXYSettings,
+  /** simple end */
+  'asm.dashboard.overview': 'Attack Surface Overview',
+  'asm.dashboard.total_domains': 'Total Domains',
+  'asm.dashboard.total_ips': 'Total IPs',
+  'asm.dashboard.total_ports': 'Total Ports',
+  'asm.dashboard.total_websites': 'Total Websites',
+  'asm.dashboard.risk_distribution': 'Risk Distribution',
+  'asm.dashboard.quick_actions': 'Quick Actions',
+  'asm.dashboard.start_scan': 'Start Scan',
+  'asm.dashboard.refresh_data': 'Refresh Data',
+  'asm.dashboard.export_report': 'Export Report',
+  'asm.dashboard.recent_findings': 'Recent Findings',
+  'setting.asm.enabled': 'Enabled',
+  'setting.asm.disabled': 'Disabled',
+  'setting.asm.basicSettings': 'Basic Settings',
+  'setting.asm.dns_collection_brute': 'DNS Brute Force',
+  'setting.asm.dns_collection_plugin': 'Plugin DNS Recognition',
+  'setting.asm.thread_num': 'Scan Threads',
+  'setting.asm.http_timeout': 'HTTP Timeout (seconds)',
+  'setting.asm.proxy': 'HTTP Proxy',
+  'setting.asm.user_agent': 'User-Agent',
+  'setting.asm.http_headers': 'HTTP Headers',
+  'setting.asm.add_header': 'Add HTTP Header',
+  'setting.asm.save': 'Save Configuration',
+  'setting.asm.reset': 'Reset',
+  'setting.asm.save_success': 'Configuration updated',
+  'setting.asm.save_error': 'Failed to update configuration',
+  'setting.asm.load_error': 'Failed to load configuration',
+  'common.yes': 'Yes',
+  'common.no': 'No',
+  'common.next': 'Next',
+  'common.previous': 'Previous',
+  'common.actions': 'Actions',
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.confirm': 'Confirm',
+  'common.close': 'Close',
+  'common.edit': 'Edit',
+  'common.delete': 'Delete',
+  settings: {
+    log: {
+      title: 'Log Viewer',
+      path: 'Log File Path',
+      refresh: 'Refresh Logs',
+    },
+  },
+};

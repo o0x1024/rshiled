@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT \n                dns_collection_brute_status as \"dns_collection_brute_status!: bool\",\n                dns_collection_plugin_status as \"dns_collection_plugin_status!: bool\"\n            FROM config \n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "dns_collection_brute_status!: bool",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "dns_collection_plugin_status!: bool",
+        "ordinal": 1,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "af1992174fe34bd02e935aad4ee372247b80633fac9a79ea17b0e176931b6212"
+}

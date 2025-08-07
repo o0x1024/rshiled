@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main",
+    "log-viewer"
+  ],
+  "permissions": [
+    "core:default",
+    "log:default",
+    "websocket:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-focus",
+    "core:window:allow-show",
+    "core:event:allow-listen",
+    "core:window:allow-set-always-on-top"
+  ]
+}

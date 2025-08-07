@@ -1,0 +1,77 @@
+proxy:
+  host: 127.0.0.1
+  port: 8080
+  # 是否启用TLS拦截
+  intercept_tls: true
+  # CA证书和私钥路径（如果不存在会自动生成）
+  ca_cert_path: "config/RShield_CA.crt"
+  ca_key_path: "config/RShield_CA.key"
+  tls_intercept: true
+  cert_path: ./certs
+
+scanner:
+  # 扫描模式：passive（被动）, active（主动）, mixed（混合）
+  mode: "active"
+  # 并发扫描任务数
+  concurrency: 10
+  # 超时时间（毫秒）
+  timeout_ms: 5000
+  # 是否保存扫描结果
+  save_results: true
+  # 扫描结果保存路径
+  results_path: ./scan-results.json
+
+rules:
+  # 是否启用内置规则
+  enable_builtin: true
+  # 是否启用扩展规则
+  enable_extensions: true
+  # 扩展规则路径
+  extensions_path: ./rules
+  
+  # 漏洞类型配置
+  vulnerabilities:
+    xss:
+      enabled: true
+      # 是否使用AST分析
+      use_ast: true
+      # 插桩参数的最大数量
+      max_params: 20
+      # 插桩测试的最大深度
+      max_depth: 3
+      detection_level: high
+      
+    sql_injection:
+      enabled: true
+      # 检测级别：low, medium, high
+      level: "high"
+      detection_level: high
+      
+    rce:
+      enabled: true
+      # 检测级别：low, medium, high
+      level: "high"
+      detection_level: medium
+      
+    path_traversal:
+      enabled: true
+      detection_level: medium
+      
+    open_redirect:
+      enabled: true
+      detection_level: medium
+
+logging:
+  # 日志级别：error, warn, info, debug, trace
+  level: "info"
+  # 是否输出到文件
+  file_output: true
+  # 日志文件路径
+  file_path: ./passvia_scan.log
+  # 是否在控制台显示彩色日志
+  colored_output: true 
+
+reporting:
+  save_results: true
+  results_path: ./scan-results.json
+  format: json 

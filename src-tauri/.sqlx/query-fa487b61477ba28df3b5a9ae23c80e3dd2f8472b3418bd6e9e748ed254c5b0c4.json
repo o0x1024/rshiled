@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS cregex (\n            id    INTEGER PRIMARY KEY AUTOINCREMENT,\n            name  TEXT,\n            regex TEXT,\n            rtype INTEGER,\n            status INTEGER,\n            create_at INTEGER,\n            update_at INTEGER\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "fa487b61477ba28df3b5a9ae23c80e3dd2f8472b3418bd6e9e748ed254c5b0c4"
+}

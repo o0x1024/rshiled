@@ -1,0 +1,12 @@
+{
+  "font_size": 12,
+  "line_height": 1.5,
+  "use_proxy": false,
+  "proxy_host": "",
+  "proxy_port": 8080,
+  "proxy_type": "http",
+  "proxy_user": "",
+  "proxy_password": "",
+  "timeout": 30,
+  "default_http_version": "Http1"
+}
