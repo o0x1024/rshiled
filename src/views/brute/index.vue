@@ -183,7 +183,6 @@
 		<a-table 
 			:data="results" 
 			:loading="resultsLoading" 
-			:row-key="(record: BruteForceResult) => `${record.task_id}_${record.username}_${record.password}`" 
 			:pagination="{ pageSize: 10 }"
 		>
 			<template #columns>
@@ -212,8 +211,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router';
-import { computed, ref, onMounted, onActivated, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import * as BruteApi from '@/api/brute';
 import type { BruteForceTask, BruteForceResult } from '@/api/brute';
@@ -234,8 +232,6 @@ const setCollapsed = (val: boolean) => {
 	menuCollapse.value = val
 };
 
-const router = useRouter()
-const route = useRoute();
 
 const paddingStyle = computed(() => {
 	const paddingLeft = { paddingLeft: menuCollapse.value ? '68px' : '220px' }
@@ -484,20 +480,7 @@ onUnmounted(() => {
 	}
 });
 
-// 缓存视图
-const cachedViews = computed(() => {
-	const cacheList: string[] = [];
-	const routes = router.getRoutes();
-	routes.forEach(route => {
-		if (route.meta && route.meta.keepAlive && route.name) {
-			cacheList.push(route.name.toString());
-			if (route.meta.componentName) {
-				cacheList.push(route.meta.componentName.toString());
-			}
-		}
-	});
-	return cacheList;
-});
+
 </script>
 
 <style scoped>

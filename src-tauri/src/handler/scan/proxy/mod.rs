@@ -5,10 +5,10 @@ pub use types::{HttpRequest, HttpResponse};
 
 use hudsucker::Body;
 use hudsucker::{
-    certificate_authority::OpensslAuthority,
+    certificate_authority::RcgenAuthority,
     hyper,
     hyper::body::Bytes,
-    openssl::{hash::MessageDigest, pkey::PKey, x509::X509},
+    rcgen::{CertificateParams, KeyPair},
     rustls::crypto::aws_lc_rs,
     tokio_tungstenite::tungstenite::Message,
     HttpContext, HttpHandler, RequestOrResponse, WebSocketContext, WebSocketHandler, *,
@@ -28,7 +28,7 @@ use uuid::Uuid;
 // Hudsucker相关导入
 use hudsucker::hyper::{Request, Response};
 use hudsucker::{
-    builder::ProxyBuilder, certificate_authority::RcgenAuthority, Proxy as HudsuckerProxy,
+    builder::ProxyBuilder, Proxy as HudsuckerProxy,
 };
 use tokio::net::TcpStream;
 use tokio::sync::Mutex as TokioMutex;
@@ -299,18 +299,20 @@ impl Proxy {
 
         if let Some(cert_manager) = &self.cert_manager {
             // 获取CA证书和私钥
-            let (cert, key_pair) = cert_manager.get_ca_cert_and_key()?;
+            let (cert_pem, key_pem) = cert_manager.get_ca_cert_and_key()?;
 
-            // 解析证书和私钥
-            let private_key = PKey::private_key_from_pem(&key_pair)
+            // 解析私钥和证书
+            let key_pair = KeyPair::from_pem(&String::from_utf8_lossy(&key_pem))
                 .map_err(|e| format!("解析私钥失败: {}", e))?;
-            let ca_cert = X509::from_pem(&cert).map_err(|e| format!("解析CA证书失败: {}", e))?;
+            let ca_cert = CertificateParams::from_ca_cert_pem(&String::from_utf8_lossy(&cert_pem))
+                .map_err(|e| format!("解析CA证书失败: {}", e))?
+                .self_signed(&key_pair)
+                .map_err(|e| format!("签名CA证书失败: {}", e))?;
 
             // 创建CA
-            let ca = OpensslAuthority::new(
-                private_key,
+            let ca = RcgenAuthority::new(
+                key_pair,
                 ca_cert,
-                MessageDigest::sha256(),
                 1_000,
                 aws_lc_rs::default_provider(),
             );
@@ -464,18 +466,20 @@ impl Proxy {
 
         if let Some(cert_manager) = &self.cert_manager {
             // 获取CA证书和私钥
-            let (cert, key_pair) = cert_manager.get_ca_cert_and_key()?;
+            let (cert_pem, key_pem) = cert_manager.get_ca_cert_and_key()?;
 
-            // 解析证书和私钥
-            let private_key = PKey::private_key_from_pem(&key_pair)
+            // 解析私钥和证书
+            let key_pair = KeyPair::from_pem(&String::from_utf8_lossy(&key_pem))
                 .map_err(|e| format!("解析私钥失败: {}", e))?;
-            let ca_cert = X509::from_pem(&cert).map_err(|e| format!("解析CA证书失败: {}", e))?;
+            let ca_cert = CertificateParams::from_ca_cert_pem(&String::from_utf8_lossy(&cert_pem))
+                .map_err(|e| format!("解析CA证书失败: {}", e))?
+                .self_signed(&key_pair)
+                .map_err(|e| format!("签名CA证书失败: {}", e))?;
 
             // 创建CA
-            let ca = OpensslAuthority::new(
-                private_key,
+            let ca = RcgenAuthority::new(
+                key_pair,
                 ca_cert,
-                MessageDigest::sha256(),
                 1_000,
                 aws_lc_rs::default_provider(),
             );

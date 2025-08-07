@@ -322,7 +322,7 @@ import { ref, reactive, onMounted, computed,onUnmounted} from 'vue';
 import { Message, Modal } from '@arco-design/web-vue';
 import { invoke } from '@tauri-apps/api/core';
 import { useI18n } from 'vue-i18n';
-import { open, save } from '@tauri-apps/plugin-dialog';
+import { save } from '@tauri-apps/plugin-dialog';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
 // 定义代理配置接口
@@ -862,38 +862,6 @@ const saveRule = async () => {
   }
 };
 
-// 删除规则
-const removeRule = (type: 'request' | 'response') => {
-  Modal.warning({
-    title: '确认删除',
-    content: '确定要删除选中的规则吗？此操作无法撤销。',
-    okText: '删除',
-    cancelText: '取消',
-    onOk: async () => {
-      try {
-        if (type === 'request' && selectedRequestRule.value) {
-          requestRules.value = requestRules.value.filter(r => r.id !== selectedRequestRule.value?.id);
-          selectedRequestRuleKeys.value = [];
-          // 调用后端API保存规则
-          await invoke('set_request_rules', {
-            rules: requestRules.value.map(convertRuleToBackend)
-          });
-          Message.success(t('proxy.settings.rule_deleted'));
-        } else if (type === 'response' && selectedResponseRule.value) {
-          responseRules.value = responseRules.value.filter(r => r.id !== selectedResponseRule.value?.id);
-          selectedResponseRuleKeys.value = [];
-          // 调用后端API保存规则
-          await invoke('set_response_rules', {
-            rules: responseRules.value.map(convertRuleToBackend)
-          });
-          Message.success(t('proxy.settings.rule_deleted'));
-        }
-      } catch (error) {
-        Message.error(`删除规则失败: ${error}`);
-      }
-    }
-  });
-};
 
 // 切换规则状态
 const toggleRuleStatus = async (type: 'request' | 'response', ruleId: string, enabled: any) => {

@@ -121,7 +121,7 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import { Message, Divider } from '@arco-design/web-vue';
+import { Message } from '@arco-design/web-vue';
 
 const emit = defineEmits(['confirm', 'cancel']);
 

@@ -190,6 +190,5 @@ export default {
   'scan.target_list_loaded': 'Target list loaded, {count} targets in total.',
   'scan.file_read_error': 'Failed to read file.',
   // Passive Scan specific
-  'scan.passive_scan': 'Passive Scan',
 
 };

@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
@@ -681,24 +681,12 @@ const forwardResponse = async () => {
     console.log('转发响应ID:', responseId);
 
     // 先清除当前请求和响应的引用，避免页面卡死
-    const responseBeingForwarded = currentResponse.value;
     currentRequest.value = null;
     currentResponse.value = null;
     rawRequest.value = '';
     rawResponse.value = '';
 
-    // 创建响应转发参数
-    const forwardParams: {
-      responseId: string;
-      status: number | null;
-      headers: Record<string, string> | null;
-      body: string | null;
-    } = {
-      responseId: responseId,
-      status: statusChanged ? parsedResponse.status : null,
-      headers: headersChanged ? parsedResponse.headers : null,
-      body: bodyChanged ? parsedResponse.body : null
-    };
+
 
     // 使用非阻塞方式执行转发
     setTimeout(async () => {

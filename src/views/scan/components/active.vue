@@ -992,13 +992,7 @@ const paginatedVulnerabilities = computed(() => {
   return vulnerabilities.value.slice(start, end);
 });
 
-// 数组输入处理方法
-const updateVulnerabilityScanPlugins = () => {
-  if (formData.detailed_scan_options && formData.detailed_scan_options.vulnerability_scan) {
-    formData.detailed_scan_options.vulnerability_scan.plugins = 
-      vulnerabilityScanPluginsInput.value.split(',').map(p => p.trim()).filter(p => p);
-  }
-};
+
 
 const updateServiceBruteforceServices = () => {
   if (formData.detailed_scan_options && formData.detailed_scan_options.service_bruteforce) {

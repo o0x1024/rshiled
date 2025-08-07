@@ -301,9 +301,7 @@ import { useI18n } from 'vue-i18n';
 import { Codemirror } from 'vue-codemirror';
 import { json } from '@codemirror/lang-json';
 import { xml } from '@codemirror/lang-xml';
-import { javascript } from '@codemirror/lang-javascript';
 import { html } from '@codemirror/lang-html';
-import { css } from '@codemirror/lang-css';
 import { EditorView } from '@codemirror/view';
 
 const { t } = useI18n();
@@ -360,15 +358,7 @@ const xmlExtension = computed(() => [xml(), baseTheme]);
 const htmlExtension = computed(() => [html(), baseTheme]);
 
 
-const codeExtension = computed(() => {
-  if (contentType.value.includes('javascript')) {
-    return [javascript(), baseTheme];
-  } else if (contentType.value.includes('css')) {
-    return [css(), baseTheme];
-  } else {
-    return [baseTheme];
-  }
-});
+
 
 const textExtension = computed(() => [baseTheme]);
 
@@ -416,13 +406,6 @@ const isHtml = computed(() => {
   return contentType.value.includes('text/html');
 });
 
-const isCode = computed(() => {
-  if (!currentRequest.value?.response_body) return false;
-  
-  // 检查 Content-Type
-  return contentType.value.includes('javascript') || 
-         contentType.value.includes('css');
-});
 
 const hasHtmlContent = computed(() => {
   if (!currentRequest.value?.response_body) return false;
@@ -433,29 +416,6 @@ const hasHtmlContent = computed(() => {
   // 检查内容是否包含 HTML 标签
   const body = currentRequest.value.response_body.trim();
   return body.includes('<html') || body.includes('<body') || body.includes('<div');
-});
-
-// 格式化后的响应内容
-const formattedResponse = computed(() => {
-  if (!currentRequest.value?.response_body) return '';
-  
-  try {
-    if (isJson.value) {
-      // 美化 JSON
-      const obj = JSON.parse(currentRequest.value.response_body);
-      return JSON.stringify(obj, null, 2);
-    } else if (isXml.value) {
-      // 简单格式化 XML
-      return formatXml(currentRequest.value.response_body);
-    } else if (isCode.value) {
-      // 代码直接返回
-      return currentRequest.value.response_body;
-    }
-    return currentRequest.value.response_body;
-  } catch (e) {
-    console.error('格式化响应内容出错:', e);
-    return currentRequest.value.response_body;
-  }
 });
 
 // 格式化 XML (简单实现)
@@ -892,33 +852,6 @@ function getStatusText(status: number): string {
   return statusMap[status] || 'Unknown';
 }
 
-/**
- * 格式化十六进制字符串，每16个字节一行
- */
-function formatHexString(hexString: string): string {
-  if (!hexString) return '';
-  
-  const bytes = new TextEncoder().encode(hexString);
-  let result = '';
-  
-  for (let i = 0; i < bytes.length; i += 16) {
-    const chunk = bytes.slice(i, i + 16);
-    const offset = formatOffset(i);
-    const hexValues = Array.from(chunk).map(b => b.toString(16).padStart(2, '0')).join(' ');
-    
-    // ASCII部分
-    const asciiValues = Array.from(chunk).map(b => {
-      if (b >= 32 && b <= 126) { // 可打印字符
-        return String.fromCharCode(b);
-      }
-      return '.'; // 不可打印字符用点表示
-    }).join('');
-    
-    result += `${offset}  ${hexValues.padEnd(48, ' ')}  |${asciiValues}|\n`;
-  }
-  
-  return result;
-}
 
 // 监听当前请求变化，更新CodeMirror内容
 watch(() => currentRequest.value, (newRequest) => {

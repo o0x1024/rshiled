@@ -99,7 +99,6 @@ const pagination: Pagination = reactive({
 
 const add_visible = ref(false)
 const ips: { list: IPs[] } = reactive({ list: [] })
-const asset_status = ref('valid')
 const filterValue = ref('ip_addr')
 const search_key = ref('')
 const rdtype = ref('all')

@@ -1,0 +1,174 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows x86-64
+          - platform: 'windows-latest'
+            args: '--target x86_64-pc-windows-msvc'
+            target: 'x86_64-pc-windows-msvc'
+            name: 'windows-x86_64'
+          
+          # Windows ARM64
+          - platform: 'windows-latest'
+            args: '--target aarch64-pc-windows-msvc'
+            target: 'aarch64-pc-windows-msvc'
+            name: 'windows-arm64'
+          
+          # macOS x86-64 (Intel)
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+            target: 'x86_64-apple-darwin'
+            name: 'macos-x86_64'
+          
+          # macOS ARM64 (Apple Silicon)
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+            target: 'aarch64-apple-darwin'
+            name: 'macos-arm64'
+          
+          # Linux x86-64
+          - platform: 'ubuntu-20.04'
+            args: '--target x86_64-unknown-linux-gnu'
+            target: 'x86_64-unknown-linux-gnu'
+            name: 'linux-x86_64'
+          
+          # Linux ARM64
+          - platform: 'ubuntu-20.04'
+            args: '--target aarch64-unknown-linux-gnu'
+            target: 'aarch64-unknown-linux-gnu'
+            name: 'linux-arm64'
+
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-20.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+          # ARM64 cross-compilation dependencies
+          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Configure cross-compilation (Linux ARM64)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          echo "[target.aarch64-unknown-linux-gnu]" >> ~/.cargo/config.toml
+          echo "linker = \"aarch64-linux-gnu-gcc\"" >> ~/.cargo/config.toml
+
+      # macOS 代码签名设置
+      - name: Import Code-Signing Certificates (macOS)
+        if: runner.os == 'macOS'
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+
+      # Windows 代码签名设置
+      - name: Setup Windows Code Signing (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "${{ secrets.WINDOWS_CERTIFICATE }}" | base64 --decode > certificate.p12
+        shell: bash
+
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          # macOS 签名环境变量
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Windows 签名环境变量
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          # 公证设置
+          ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.WINDOWS_CERTIFICATE != '' }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'rshield v__VERSION__'
+          releaseBody: 'See the assets to download and install this version.'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rshield-${{ matrix.name }}
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/
+            !src-tauri/target/${{ matrix.target }}/release/bundle/**/.*
+          retention-days: 30
+
+  # 合并所有构建产物
+  release:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -la artifacts/
+
+      - name: Create release assets
+        run: |
+          mkdir -p release-assets
+          for dir in artifacts/*/; do
+            platform=$(basename "$dir")
+            cd "$dir"
+            # 压缩每个平台的构建产物
+            tar -czf "../../release-assets/rshield-${platform}.tar.gz" .
+            cd ../..
+          done
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -41,7 +41,8 @@ hex = "0.4"
 url = { version = "2.2", features = ["serde"] }
 base64 = "0.22.1"
 native-tls = "0.2"
-openssl = { version = "0.10.57", features = ["vendored"] }
+# openssl = { version = "0.10.57", features = ["vendored"] }
+rustls = "0.23.31"
 rusqlite = { version = "0.32.0", features = ["bundled"] }
 pnet = "0.35.0"
 colored = "2.0"  
@@ -87,7 +88,7 @@ actix-web-httpauth = "0.8.1"
 actix-web = { version = "4.9.0", default-features = false, features = [
   "macros",
   "compress-gzip",
-  "openssl",
+  "rustls-0_23",
 ] }
 
 oxc_allocator = "0.65.0"
@@ -136,6 +137,8 @@ walkdir = "2.3"
 # 证书处理相关
 rcgen = "0.11"
 rustls-pemfile = "1.0"
+x509-parser = "0.16"
+rustls-pki-types = "1.0"
 
 # 添加socket2依赖用于跨平台套接字处理
 socket2 = "0.5.5"
@@ -177,7 +180,7 @@ block-modes = "0.9" # For CBC mode and padding
 
 
 # HTTP(S)代理相关
-hyper = { version = "1.6.0", features = ["full"] }
+hyper = { version = "1.0", features = ["full"] }
 hyper-tls = "0.6"
 
 

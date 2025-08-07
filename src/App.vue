@@ -16,7 +16,6 @@ import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
 import useLocale from '@/hooks/locale';
 import { useAppStore } from '@/store';
 import { menuList } from '@/types/menu';
-import { invoke } from "@tauri-apps/api/core";
 
 
 const appStore = useAppStore();

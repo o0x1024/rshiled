@@ -30,7 +30,11 @@ use crate::global::config::CoreConfig;
 use crate::internal::finger::get_teamplate;
 use log::*;
 
-use openssl::ssl::{Ssl, SslContext, SslMethod};
+use tokio_rustls::{TlsConnector, rustls::{ClientConfig, RootCertStore}};
+use rustls_pemfile;
+use webpki_roots;
+use tokio::net::TcpStream as TokioTcpStream;
+use x509_parser::prelude::*;
 
 use headless_chrome::{Browser, LaunchOptions};
 use std::net::TcpStream;
@@ -609,15 +613,23 @@ async fn check_website(
             ws.status_code = Some(response.status().as_u16() as i32);
             let headers_clone = response.headers().clone();
             let html_content = response.text().await.unwrap_or_default();
-            let document = Html::parse_document(&html_content);
-            let title_selector = Selector::parse("title").unwrap();
-
-            if let Some(title_element) = document.select(&title_selector).next() {
-                let title = title_element.text().collect::<String>();
-                ws.title = Some(title.trim().to_string());
-            }
+            
+            // 提取标题
+            let title = {
+                let document = Html::parse_document(&html_content);
+                let title_selector = Selector::parse("title").unwrap();
+                if let Some(title_element) = document.select(&title_selector).next() {
+                    let title = title_element.text().collect::<String>();
+                    Some(title.trim().to_string())
+                } else {
+                    None
+                }
+            }; // document 在这里被自动 drop
+            
             let headers = headers_to_string(&headers_clone);
-            let cert_info = get_ssl_info(&task_id, http_url.as_str(),&root_domains).unwrap_or("".into());
+            let cert_info = get_ssl_info(&task_id, http_url.as_str(),&root_domains).await.unwrap_or("".into());
+            
+            ws.title = title;
             ws.headers = Some(headers);
             ws.ssl_info = Some(cert_info);
             ws.screenshot = match get_screenshot(&http_url, browser) {
@@ -642,17 +654,24 @@ async fn check_website(
             ws.status_code = Some(response.status().as_u16() as i32);
             let headers_clone = response.headers().clone();
             let headers = headers_to_string(&headers_clone);
-            let cert_info = get_ssl_info(&task_id, https_url.as_str(),&root_domains).unwrap_or("".into());
-
+            
             let html_content = response.text().await.unwrap_or_default();
-            let document = Html::parse_document(&html_content);
-            let title_selector = Selector::parse("title").unwrap();
+            
+            // 提取标题
+            let title = {
+                let document = Html::parse_document(&html_content);
+                let title_selector = Selector::parse("title").unwrap();
+                if let Some(title_element) = document.select(&title_selector).next() {
+                    let title = title_element.text().collect::<String>();
+                    Some(title.trim().to_string())
+                } else {
+                    None
+                }
+            }; // document 在这里被自动 drop
+            
+            let cert_info = get_ssl_info(&task_id, https_url.as_str(),&root_domains).await.unwrap_or("".into());
 
-            if let Some(title_element) = document.select(&title_selector).next() {
-                let title = title_element.text().collect::<String>();
-                ws.title = Some(title.trim().to_string());
-            }
-
+            ws.title = title;
             ws.headers = Some(headers);
             ws.ssl_info = Some(cert_info);
             ws.screenshot = match get_screenshot(&https_url, browser) {
@@ -668,7 +687,7 @@ async fn check_website(
     Some(wss)
 }
 
-fn get_ssl_info(
+async fn get_ssl_info(
     task_id: &i32,
     url_str: &str,
     root_domains: &Vec<String>,
@@ -681,70 +700,83 @@ fn get_ssl_info(
     let domain = url.host_str().expect("Failed to get domain");
     let port = url.port_or_known_default().expect("Failed to get port");
 
-    let mut ctx = SslContext::builder(SslMethod::tls())?;
-    ctx.set_default_verify_paths()?;
-    let ctx = ctx.build();
+    // 创建 rustls 配置
+    let mut root_cert_store = tokio_rustls::rustls::RootCertStore::empty();
+    for cert in webpki_roots::TLS_SERVER_ROOTS {
+        root_cert_store.add(&tokio_rustls::rustls::Certificate(cert.subject_public_key_info.to_vec())).unwrap();
+    }
+    
+    let config = tokio_rustls::rustls::ClientConfig::builder()
+        .with_safe_defaults()
+        .with_root_certificates(root_cert_store)
+        .with_no_client_auth();
+    
+    let connector = TlsConnector::from(Arc::new(config));
+    let domain_name = tokio_rustls::rustls::ServerName::try_from(domain)
+        .map_err(|_| "Invalid domain name")?;
 
     // 建立 TCP 连接
-    let stream = TcpStream::connect(format!("{}:{}", domain, port))?;
-    // 创建 SSL 连接
-    let ssl = Ssl::new(&ctx)?;
-    let stream = ssl.connect(stream)?;
-
-    // 获取证书
-    let cert = stream
-        .ssl()
-        .peer_certificate()
-        .ok_or("No certificate found")?;
-
-    // 新增：提取证书中的域名并存储到数据库
-    let cert_domains = extract_domains_from_cert(&cert);
-    if !cert_domains.is_empty() {
-        let task_id_clone = task_id.clone();
-        let root_domains_clone = root_domains.clone();
-        tokio::spawn(async move {
-            if let Err(e) =
-                save_cert_domains_to_db(&task_id_clone, &cert_domains, &root_domains_clone).await
-            {
-                error!("Failed to save certificate domains to DB: {}", e);
-            }
-        });
-    }
-
-    if let Ok(ct) = cert.to_text() {
-        match String::from_utf8(ct) {
-            Ok(s) => Ok(s),
-            Err(err) => {
-                error!("{}", err);
-                Err("转换失败".into())
-            }
+    let stream = tokio::net::TcpStream::connect(format!("{}:{}", domain, port)).await?;
+    
+    // 创建 TLS 连接
+    let tls_stream = connector.connect(domain_name, stream).await?;
+    
+    // 获取证书链
+    let (_, connection) = tls_stream.into_inner();
+    let peer_certificates = connection.peer_certificates();
+    
+    if let Some(cert_der) = peer_certificates.and_then(|certs| certs.first()) {
+        // 解析证书
+        let (_, cert) = X509Certificate::from_der(cert_der.as_ref())
+            .map_err(|e| format!("Failed to parse certificate: {}", e))?;
+        
+        // 提取证书中的域名并存储到数据库
+        let cert_domains = extract_domains_from_cert_rustls(&cert);
+        if !cert_domains.is_empty() {
+            let task_id_clone = task_id.clone();
+            let root_domains_clone = root_domains.clone();
+            tokio::spawn(async move {
+                if let Err(e) =
+                    save_cert_domains_to_db(&task_id_clone, &cert_domains, &root_domains_clone).await
+                {
+                    error!("Failed to save certificate domains to DB: {}", e);
+                }
+            });
         }
+        
+        // 返回证书的文本表示
+        Ok(format!("{:?}", cert))
     } else {
-        Err("Failed to convert certificate to text".into()) // Convert &'static str to Box<dyn Error>
+        Err("No certificate found".into())
     }
 }
 
-// 提取证书中的所有域名
-fn extract_domains_from_cert(cert: &openssl::x509::X509) -> Vec<String> {
+// 提取证书中的所有域名 (使用 x509_parser)
+fn extract_domains_from_cert_rustls(cert: &X509Certificate) -> Vec<String> {
     let mut domains = Vec::new();
 
     // 尝试从主题中获取 Common Name
-    if let Some(name_entry) = cert
-        .subject_name()
-        .entries_by_nid(openssl::nid::Nid::COMMONNAME)
-        .next()
-    {
-        if let Ok(cn) = name_entry.data().as_utf8() {
-            domains.push(cn.to_string());
+    let subject = cert.subject();
+    for rdn in subject.iter() {
+        for attr in rdn.iter() {
+            if let Ok(cn) = attr.attr_value().as_str() {
+                if !domains.contains(&cn.to_string()) {
+                    domains.push(cn.to_string());
+                }
+            }
         }
     }
 
     // 尝试从 Subject Alternative Names 扩展中获取域名
-    if let Some(sans) = cert.subject_alt_names() {
-        for san in sans {
-            if let Some(domain) = san.dnsname() {
-                if !domains.contains(&domain.to_string()) {
-                    domains.push(domain.to_string());
+    let extensions = cert.extensions();
+    for ext in extensions {
+        if let ParsedExtension::SubjectAlternativeName(san) = ext.parsed_extension() {
+            for name in &san.general_names {
+                if let GeneralName::DNSName(dns_name) = name {
+                    let domain = dns_name.to_string();
+                    if !domains.contains(&domain) {
+                        domains.push(domain);
+                    }
                 }
             }
         }

@@ -7,7 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AAffix: typeof import('@arco-design/web-vue')['Affix']
     AAlert: typeof import('@arco-design/web-vue')['Alert']
     ABadge: typeof import('@arco-design/web-vue')['Badge']
     AButton: typeof import('@arco-design/web-vue')['Button']
@@ -30,7 +29,6 @@ declare module 'vue' {
     AFormItem: typeof import('@arco-design/web-vue')['FormItem']
     AImage: typeof import('@arco-design/web-vue')['Image']
     AInput: typeof import('@arco-design/web-vue')['Input']
-    AInputGroup: typeof import('@arco-design/web-vue')['InputGroup']
     AInputNumber: typeof import('@arco-design/web-vue')['InputNumber']
     AInputPassword: typeof import('@arco-design/web-vue')['InputPassword']
     AInputSearch: typeof import('@arco-design/web-vue')['InputSearch']
@@ -53,8 +51,6 @@ declare module 'vue' {
     ASpin: typeof import('@arco-design/web-vue')['Spin']
     ASplit: typeof import('@arco-design/web-vue')['Split']
     AStatistic: typeof import('@arco-design/web-vue')['Statistic']
-    AStep: typeof import('@arco-design/web-vue')['Step']
-    ASteps: typeof import('@arco-design/web-vue')['Steps']
     ASubMenu: typeof import('@arco-design/web-vue')['SubMenu']
     ASwitch: typeof import('@arco-design/web-vue')['Switch']
     ATable: typeof import('@arco-design/web-vue')['Table']
@@ -72,7 +68,6 @@ declare module 'vue' {
     AUpload: typeof import('@arco-design/web-vue')['Upload']
     FloatingButton: typeof import('./src/components/FloatingButton.vue')['default']
     History: typeof import('./src/components/repeater/components/history.vue')['default']
-    LoadingScreen: typeof import('./src/components/LoadingScreen.vue')['default']
     Menu: typeof import('./src/components/menu/index.vue')['default']
     Navbar: typeof import('./src/components/navbar/index.vue')['default']
     Repeater: typeof import('./src/components/repeater/index.vue')['default']

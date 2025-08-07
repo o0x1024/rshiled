@@ -33,7 +33,30 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "rshield Team",
+    "copyright": "Copyright © 2025 rshield Team. All rights reserved.",
+    "category": "DeveloperTool",
+    "shortDescription": "A comprehensive security testing tool",
+    "longDescription": "rshield is a powerful security testing and vulnerability assessment tool designed for penetration testers and security professionals.",
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13",
+      "exceptionDomain": "",
+      "signingIdentity": "Apple Development: o0x1024@gmail.com (5AGZ74SY29)",
+      "providerShortName": null,
+      "entitlements": null
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
   },
   "plugins": {
     "shell": {

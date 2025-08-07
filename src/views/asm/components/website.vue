@@ -140,7 +140,6 @@ const pagination: Pagination = reactive({
 });
 
 const website: { list: WebSite[] } = reactive({ list: [] })
-const asset_status = ref('valid')
 const filterValue = ref('task_id')
 const search_key = ref('')
 const drawer_content = ref('')

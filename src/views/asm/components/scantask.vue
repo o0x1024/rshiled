@@ -449,11 +449,6 @@ onBeforeUnmount(() => {
 	}
 })
 
-function startPolling() {
-	pollingInterval = setInterval(() => {
-		RefreshData() // 定期请求数据
-	}, 5000); // 每 5 秒请求一次
-}
 
 const onDel = async (eid: string) => {
 	await invoke("del_task_by_id", { eid: eid }).then((res: any) => {
@@ -482,16 +477,7 @@ const onSwitchChange = async (eid: number, status: any) => {
 	})
 }
 
-const onRun = async (eid: any) => {
-	Message.info("开始扫描,如有异常,请查看日志信息")
-	await invoke("run_scan", { eid: eid }).then((res: any) => {
-		if (res) {
-			Message.success("扫描开始")
-		}
-	}).catch((err) => {
-		Message.error("扫描失败，原因：" + err)
-	})
-}
+
 
 const onSelectScanType = async (scanType: string, taskId: string | number) => {
 	Message.info(`开始${scanType}扫描，如有异常，请查看日志信息`)

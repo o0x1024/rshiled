@@ -199,7 +199,7 @@ impl HttpInterceptor {
                 match cmd {
                     ResponseControlCommand::Forward { req_id, status, headers, body, response_tx } => {
                         // 查找等待处理的响应
-                        let response_complete = {
+                        let _response_complete = {
                             let mut active_responses = resp_active_responses.lock().await; // 使用克隆的 Arc
                             if let Some(tx) = active_responses.remove(&req_id) {
                                 // 发送转发决定
@@ -416,4 +416,4 @@ impl HttpInterceptor {
         
         result
     }
-} 
+}

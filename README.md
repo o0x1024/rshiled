@@ -51,6 +51,44 @@ RSHILED
 - boa javascritp runtime
 - ast
 
+## 构建和发布
+
+### 本地开发
+```bash
+# 安装依赖
+npm install
+
+# 开发模式
+npm run tauri dev
+
+# 构建应用
+npm run tauri build
+```
+
+### 代码签名
+
+本项目支持多平台代码签名，确保应用的安全性和可信度。详细配置请参考：
+- [代码签名配置指南](docs/code-signing.md)
+
+#### 支持的平台
+- **macOS**: Apple Developer 证书签名
+- **Windows**: 代码签名证书
+- **Linux**: 标准打包（无需特殊签名）
+
+#### GitHub Actions 自动构建
+
+项目配置了 GitHub Actions 工作流，支持：
+- 多平台自动构建（Windows x86-64/ARM64, macOS x86-64/ARM64, Linux x86-64/ARM64）
+- 自动代码签名
+- 自动发布到 GitHub Releases
+
+### 发布流程
+
+1. 创建新的 Git tag
+2. 推送到 GitHub
+3. GitHub Actions 自动构建所有平台版本
+4. 自动创建 GitHub Release
+
 请读取项目信息，其中部分模块已经完成，请针对未完成的模块进行开发
 
 

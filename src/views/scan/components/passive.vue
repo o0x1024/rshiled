@@ -629,14 +629,7 @@ const stopScan = async () => {
   }
 };
 
-// Reset form
-const resetForm = () => {
-  formData.port = 8080;
-  formData.intercept_tls = false;
-  formData.save_results = false;
-  formData.results_path = '';
-  formData.use_plugins = false;
-};
+
 
 // Export results
 const exportResults = async () => {

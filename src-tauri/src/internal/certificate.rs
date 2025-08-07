@@ -140,7 +140,7 @@ impl CertificateAuthority {
         params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
         
         // 设置证书有效期 - 10年
-        let now = Utc::now();
+        let _now = Utc::now();
         let not_before = OffsetDateTime::now_utc();
         let not_after = not_before.checked_add(time::Duration::days(3650)).unwrap(); // 10年
         params.not_before = not_before;

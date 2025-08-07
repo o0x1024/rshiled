@@ -8,7 +8,10 @@ use console::{style, Emoji};
 #[cfg(not(target_os = "windows"))]
 use daemonize::Daemonize;
 use engine::execute::ClusterType;
-use engine::slinger::openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
+use rustls::ServerConfig;
+use rustls_pemfile::{certs, pkcs8_private_keys};
+use std::fs::File;
+use std::io::BufReader;
 use log::{error, info};
 use std::collections::BTreeMap;
 use std::sync::mpsc::channel;
@@ -153,7 +156,7 @@ pub fn api_server(
     UnixSocketAddr::SocketAddr(sa) => {
       if let Ok(ssl_config) = ssl {
         (
-          http_server.bind_openssl(sa, ssl_config)?,
+          http_server.bind_rustls_0_23(sa, ssl_config)?,
           format!("https://{}/v1/observer_ward", listening_address),
         )
       } else {
@@ -207,13 +210,37 @@ fn print_help(url: &str, t: Option<String>, listening_address: &UnixSocketAddr) 
 
 fn get_ssl_config(
   config: &ObserverWardConfig,
-) -> Result<SslAcceptorBuilder, engine::slinger::openssl::error::ErrorStack> {
-  let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
+) -> Result<rustls::ServerConfig, Box<dyn std::error::Error>> {
   let key_path = config.config_dir.join("key.pem");
   let cert_path = config.config_dir.join("cert.pem");
-  builder.set_private_key_file(key_path, SslFiletype::PEM)?;
-  builder.set_certificate_chain_file(cert_path)?;
-  Ok(builder)
+  
+  // 读取证书文件
+  let cert_file = File::open(&cert_path)?;
+  let mut cert_reader = BufReader::new(cert_file);
+  let cert_chain: Vec<rustls::pki_types::CertificateDer> = certs(&mut cert_reader)?
+    .into_iter()
+    .map(|cert| rustls::pki_types::CertificateDer::from(cert))
+    .collect();
+  
+  // 读取私钥文件
+  let key_file = File::open(&key_path)?;
+  let mut key_reader = BufReader::new(key_file);
+  let keys = pkcs8_private_keys(&mut key_reader)?;
+  
+  if keys.is_empty() {
+    return Err("No private key found".into());
+  }
+  
+  let private_key = rustls::pki_types::PrivateKeyDer::Pkcs8(
+    rustls::pki_types::PrivatePkcs8KeyDer::from(keys.into_iter().next().unwrap())
+  );
+  
+  // 创建 rustls 配置
+  let config = ServerConfig::builder()
+    .with_no_client_auth()
+    .with_single_cert(cert_chain, private_key)?;
+  
+  Ok(config)
 }
 
 #[cfg(not(target_os = "windows"))]

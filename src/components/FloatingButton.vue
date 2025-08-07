@@ -74,7 +74,7 @@ const handleAdd = () => {
   saveTabsToStorage();
 };
 
-const handleDelete = (key: string | number, ev?: Event) => {
+const handleDelete = (key: string | number, _ev?: Event) => {
   tabCount.value--;
   // 将key转换为字符串确保类型安全
   const tabKey = String(key);
