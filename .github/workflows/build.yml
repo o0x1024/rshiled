@@ -3,6 +3,9 @@ name: Build Desktop Apps
 on:
   push:
     branches: [ main, develop ]
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
   pull_request:
     branches: [ main ]
   release:
@@ -73,7 +76,9 @@ jobs:
           cache: 'npm'
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: |
+          npm install yarn
+          yarn install --force
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -125,11 +130,11 @@ jobs:
           # 公证设置
           ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.WINDOWS_CERTIFICATE != '' }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'rshield v__VERSION__'
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('rshield {0}', github.ref_name) || '' }}
           releaseBody: 'See the assets to download and install this version.'
-          releaseDraft: true
-          prerelease: false
+          releaseDraft: ${{ startsWith(github.ref, 'refs/tags/') }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}
 
       - name: Upload artifacts
@@ -143,7 +148,7 @@ jobs:
 
   # 合并所有构建产物
   release:
-    if: github.event_name == 'release'
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     steps:
